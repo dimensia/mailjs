@@ -27,17 +27,25 @@ describe( 'element parser', function() {
 
   it( 'should parse simple tags', function() {
     expect(
-      mailjs.parseElement( 'a' )
+      mailjs.parseElement( '[a]' )
     ).to.eql(
-      { tag: 'a', attrs: {} }
+      { el: '[a]', tag: 'a', attrs: {} }
     );
   });
 
   it( 'should parse all three quote styles', function() {
     expect(
-      mailjs.parseElement( "a foo='faz' bar=\"baz\"  car=caz" )
+      mailjs.parseElement( "[a foo='faz' bar=\"baz\"  car=caz]" )
     ).to.eql(
-      { tag: 'a', attrs: { foo: 'faz', bar: 'baz', car: 'caz' } }
+      { el: "[a foo='faz' bar=\"baz\"  car=caz]", tag: 'a', attrs: { foo: 'faz', bar: 'baz', car: 'caz' } }
+    );
+  });
+
+  it( 'should deal with quoted brackets', function() {
+    expect(
+      mailjs.parseElement( "[div tag='[div style=\"color:#000;\"]']" )
+    ).to.eql(
+      { el: "[div tag='[div style=\"color:#000;\"]']", tag: 'div', attrs: { tag: '[div style="color:#000;"]' } }
     );
   });
 
@@ -45,17 +53,29 @@ describe( 'element parser', function() {
     expect( function() {
       mailjs.parseElement( '' )
     }).to.throw();
+
+    expect( function() {
+      mailjs.parseElement( '[]' )
+    }).to.throw();
   });
 
   it( 'should throw on invalid elements', function() {
     expect( function() {
-      return mailjs.parseElement( 'a style' )
+      return mailjs.parseElement( '[a style]' )
     }).to.throw();
+  });
+
+  it( 'should support self-terminated elements', function() {
+    expect(
+      mailjs.parseElement( '[a style="display:block;"/]' )
+    ).to.eql(
+      { el: '[a style="display:block;"/]', tag: 'a', attrs: { style: 'display:block;' }, term: true }
+    );
   });
 
 });
 
-describe( 'text generation', function() {
+describe( 'generation', function() {
 
   it( 'should generate simple text', function() {
 
@@ -71,10 +91,10 @@ describe( 'text generation', function() {
   it( 'should support escapes', function() {
     expect(
       mailjs.generate({
-        src: 'Hello, \\$firstName.'
+        src: '\\[Hello, \\$firstName./\\]'
       })
     ).to.eql(
-      'Hello, $firstName.'
+      '[Hello, $firstName./]'
     );
   });
 
@@ -89,6 +109,25 @@ describe( 'text generation', function() {
       })
     ).to.eql(
       'Hello, Jane.'
+    );
+  });
+
+  it( 'should process templates', function() {
+
+    expect(
+      mailjs.generate({
+        src: '[msg name="Jane"] and [msg].',
+        binds: {
+          name: 'Joe'
+        },
+        templates: {
+          msg: {
+            src: 'a message for $name'
+          }
+        }
+      })
+    ).to.eql(
+      'a message for Jane and a message for Joe.'
     );
   });
 

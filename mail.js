@@ -27,7 +27,7 @@
   var mailjs = {
 
     resolve: function( tag, templates ) {
-      var o = templates[ tag ];
+      var o = templates && templates[ tag ];
       return o ? o : globalTemplates[ tag ];
     },
 
@@ -45,23 +45,27 @@
     },
 
     parseElement: function( s ) {
-      var tag = '';
-
-      s.replace(
+      var matches = s.match(
         // note:  this not only grabs the tag but also verifies that the entire element can be parsed, including the attributes
-        /^(\S+)+(?:\s*(?:[^\s=,]+)\s*=\s*(?:'(?:[^']+)'|"(?:[^"]+)"|(?:\S+)))*$/g,
-        function( m, m1 ) {
-          tag = m1;
-        }
+        /^\[(\S+)+(?:\s*(?:[^\s=,]+)\s*=\s*(?:'(?:[^']+)'|"(?:[^"]+)"|(?:[^'"\[\]\s]+)))*(\/?)\]/
       );
 
-      if ( !tag.length )
-        throw 'Unable to parse element: ' + s;
+      if ( !matches )
+        throw new Error( 'Unable to parse element at: ' + s );
 
-      return {
+      var el  = matches[ 0 ],
+          tag = matches[ 1 ];
+
+      var obj = {
+        el:    el,
         tag:   tag,
-        attrs: mailjs.parseAttrs( s.substring( tag.length ) )
+        attrs: mailjs.parseAttrs( el.substring( tag.length, el.length - 1 ) )
       };
+
+      if ( matches[ 2 ] )
+        obj.term = true;
+
+      return obj;
     },
 
     generate: function( opts ) {
@@ -69,9 +73,10 @@
           binds     = opts.binds || {},
           templates = opts.templates || {},
           html      = opts.html,
+          attrs     = opts.attrs || {}
           dest      = '';
 
-      for ( si=0, slen=src.length; si < slen; ) {
+      for ( var si=0, slen=src.length; si < slen; ) {
         ch = src[ si ];
 
         switch ( ch ) {
@@ -84,29 +89,30 @@
           break;
 
         case '[':
-          si++;
-          var starti = si,
-              endi   = str.indexOf( ']', starti );
+          //var end  = si+1 < slen && src[ si + 1 ] == '/';
+          //if ( ch === '/' ) {
+            //end = true;
+            //si++;
+          //}
 
-          if ( endi === -1 )
-            throw 'Missing closing "]".';
+          var el = mailjs.parseElement( src.substring( si ) );
 
-          var el = mailjs.parseElement( str.substring( starti, endi ) );
-
-          var template = mailjs.resolve( el.tag );
+          var template = mailjs.resolve( el.tag, templates );
 
           if ( template ) {
 
-            dest += mailjs.translate({
+            dest += mailjs.generate({
               src:       template.src,
               binds:     binds,
               html:      html,
               templates: templates,
               attrs:     el.attrs
             });
+
+            si += el.el.length;
           } else {
             dest += '[';
-            si = starti;
+            si++;
           }
 
           break;
@@ -117,14 +123,14 @@
           var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{([a-zA-Z0-9_]+)\}/ );
 
           if ( !matches || matches.length < 3 )
-            throw "Missing variable name after $.";
+            throw new Error( "Missing variable name after $." );
 
           var name = matches[ 1 ] || matches[ 2 ];
           si += matches[ 0 ].length;
 
-          var bind = binds[ name ];
+          var bind = attrs[ name ] || binds[ name ];
           if ( !bind )
-            throw 'No bind definition for: ' + name;
+            throw new Error( 'No bind definition for: ' + name );
 
           dest += bind;
           break;
