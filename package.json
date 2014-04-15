@@ -1,0 +1,23 @@
+{
+  "name": "mailjs",
+  "version": "0.0.1",
+  "description": "JavaScript mail formatter.",
+  "main": "mail.js",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^1.9.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dimensia/mailjs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dimensia/mailjs/issues"
+  },
+  "homepage": "https://github.com/dimensia/mailjs"
+}
