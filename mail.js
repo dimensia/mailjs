@@ -44,64 +44,65 @@
       return attrs;
     },
 
-    translate: function( opts ) {
+    parseElement: function( s ) {
+      var tag = '';
+
+      s.replace(
+        // note:  this not only grabs the tag but also verifies that the entire element can be parsed, including the attributes
+        /^(\S+)+(?:\s*(?:[^\s=,]+)\s*=\s*(?:'(?:[^']+)'|"(?:[^"]+)"|(?:\S+)))*$/g,
+        function( m, m1 ) {
+          tag = m1;
+        }
+      );
+
+      if ( !tag.length )
+        throw 'Unable to parse element: ' + s;
+
+      return {
+        tag:   tag,
+        attrs: mailjs.parseAttrs( s.substring( tag.length ) )
+      };
+    },
+
+    generate: function( opts ) {
       var src       = opts.src,
           binds     = opts.binds || {},
           templates = opts.templates || {},
           html      = opts.html,
-          dest      = '',
-          si        = 0,
-          slen      = src.length;
+          dest      = '';
 
-      function parseTag() {
-        var starti = si;
-
-        for ( ; si<slen; si++ ) {
-          switch ( src[ si ] ) {
-          case ' ':
-            return src.substring( starti, si++ );
-
-          case ']':
-            return src.substring( starti, si );
-          }
-        }
-
-        return null;
-      }
-
-      function parseTemplateAttrs() {
-        var starti = si,
-            endi   = str.indexOf( ']', starti ),
-            attrs  = {};
-
-        if ( endi === -1 )
-          throw 'Missing closing "]".';
-
-        si = endi + 1;
-        return mailjs.parseAttrs( str.substring( starti, endi ) );
-      }
-
-      while ( si < slen ) {
+      for ( si=0, slen=src.length; si < slen; ) {
         ch = src[ si ];
 
         switch ( ch ) {
+        case '\\':
+          si++;
+
+          if ( si<slen )
+            dest += src[ si++ ];
+
+          break;
+
         case '[':
           si++;
-          var starti = si;
+          var starti = si,
+              endi   = str.indexOf( ']', starti );
 
-          var tag = parseTag();
-          var attrs = parseTemplateAttrs();
+          if ( endi === -1 )
+            throw 'Missing closing "]".';
 
-          var template = mailjs.resolve( tag );
+          var el = mailjs.parseElement( str.substring( starti, endi ) );
 
-          if ( template && attrs !== null ) {
+          var template = mailjs.resolve( el.tag );
+
+          if ( template ) {
 
             dest += mailjs.translate({
               src:       template.src,
               binds:     binds,
               html:      html,
               templates: templates,
-              attrs:     attrs
+              attrs:     el.attrs
             });
           } else {
             dest += '[';
@@ -111,6 +112,21 @@
           break;
 
         case '$':
+          si++;
+
+          var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{([a-zA-Z0-9_]+)\}/ );
+
+          if ( !matches || matches.length < 3 )
+            throw "Missing variable name after $.";
+
+          var name = matches[ 1 ] || matches[ 2 ];
+          si += matches[ 0 ].length;
+
+          var bind = binds[ name ];
+          if ( !bind )
+            throw 'No bind definition for: ' + name;
+
+          dest += bind;
           break;
 
         default:
