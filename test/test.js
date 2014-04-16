@@ -65,22 +65,67 @@ describe( 'element parser', function() {
     }).to.throw();
   });
 
-  it( 'should support self-terminated elements', function() {
+  it( 'should throw on incomplete elements', function() {
+    expect( function() {
+      return mailjs.parseElement( '[' )
+    }).to.throw();
+
+    expect( function() {
+      return mailjs.parseElement( '[a style' )
+    }).to.throw();
+  });
+
+  it( 'should support self-closing elements', function() {
     expect(
       mailjs.parseElement( '[a style="display:block;"/]' )
     ).to.eql(
-      { el: '[a style="display:block;"/]', tag: 'a', attrs: { style: 'display:block;' }, term: true }
+      { el: '[a style="display:block;"/]', tag: 'a', attrs: { style: 'display:block;' }, selfClose: true }
     );
   });
 
+  it( 'should support closing elements', function() {
+    expect(
+      mailjs.parseElement( '[/a]' )
+    ).to.eql(
+      { el: '[/a]', tag: 'a', attrs: {}, close: true }
+    );
+  });
+
+  it( 'should throw on elements that are closed and self-closed', function() {
+    expect( function() {
+      return mailjs.parseElement( '[/a/]' )
+    }).to.throw( /closed and self-closed/ );
+  });
+
+  it( 'should throw on closed elements that have attributes', function() {
+    expect( function() {
+      return mailjs.parseElement( '[/a style="color:#000;"]' )
+    }).to.throw( /Closed elements should not contain attributes/ );
+  });
 });
 
 describe( 'generation', function() {
+  before( function() {
+    mailjs.config({
+      templates: {
+        btn: {
+          html: '<a style="color:#ffffff;width:$width;" href="$href">$label</a>',
+          text: '$label: $href',
+          defaults: {
+            width: '300px'
+          }
+        }
+      }
+    });
+  });
 
-  it( 'should generate simple text', function() {
+  after( function() {
+    mailjs.config({});
+  });
 
+  it( 'should render simple text', function() {
     expect(
-      mailjs.generate({
+      mailjs.render({
         src: 'This is a simple email.'
       })
     ).to.eql(
@@ -90,7 +135,7 @@ describe( 'generation', function() {
 
   it( 'should support escapes', function() {
     expect(
-      mailjs.generate({
+      mailjs.render({
         src: '\\[Hello, \\$firstName./\\]'
       })
     ).to.eql(
@@ -99,9 +144,8 @@ describe( 'generation', function() {
   });
 
   it( 'should process simple binds', function() {
-
     expect(
-      mailjs.generate({
+      mailjs.render({
         src: 'Hello, $firstName.',
         binds: {
           firstName: 'Jane'
@@ -113,9 +157,8 @@ describe( 'generation', function() {
   });
 
   it( 'should process templates', function() {
-
     expect(
-      mailjs.generate({
+      mailjs.render({
         src: '[msg name="Jane"] and [msg].',
         binds: {
           name: 'Joe'
@@ -131,5 +174,32 @@ describe( 'generation', function() {
     );
   });
 
+  it( 'should process text & html templates', function() {
+    expect(
+      mailjs.render({
+        src: '[btn href="https://apple.com" label="Visit Apple"].'
+      })
+    ).to.equal(
+      'Visit Apple: https://apple.com.'
+    );
+
+    expect(
+      mailjs.render({
+        src:  '[btn href="https://apple.com" label="Visit Apple"].',
+        html: true
+      })
+    ).to.equal(
+      '<a style="color:#ffffff;width:300px;" href="https://apple.com">Visit Apple</a>.'
+    );
+  });
+
+  it( 'should throw when using unsupported close tags', function() {
+    expect( function() {
+      mailjs.render({
+        // here, btn does not support a closing tag
+        src: '[btn href="https://apple.com" label="Visit Apple"]sample text[/btn].'
+      })
+    }).to.throw( /Closing elements not supported/ );
+  });
 });
 

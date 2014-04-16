@@ -26,9 +26,23 @@
 
   var mailjs = {
 
+    opts: {},
+
+    config: function( opts ) {
+      mailjs.opts = opts;
+    },
+
     resolve: function( tag, templates ) {
       var o = templates && templates[ tag ];
-      return o ? o : globalTemplates[ tag ];
+
+      if ( o )
+        return o;
+
+      o = this.opts.templates && this.opts.templates[ tag ];
+      if ( o )
+        return o;
+
+      return globalTemplates[ tag ];
     },
 
     parseAttrs: function( s ) {
@@ -47,14 +61,19 @@
     parseElement: function( s ) {
       var matches = s.match(
         // note:  this not only grabs the tag but also verifies that the entire element can be parsed, including the attributes
-        /^\[(\S+)+(?:\s*(?:[^\s=,]+)\s*=\s*(?:'(?:[^']+)'|"(?:[^"]+)"|(?:[^'"\[\]\s]+)))*(\/?)\]/
+        /^\[(\/?)([^\s\]/]+)+(?:\s*(?:[^\s=,]+)\s*=\s*(?:'(?:[^']+)'|"(?:[^"]+)"|(?:[^'"\[\]\s]+)))*(\/?)\]/
       );
 
       if ( !matches )
         throw new Error( 'Unable to parse element at: ' + s );
 
-      var el  = matches[ 0 ],
-          tag = matches[ 1 ];
+      var el         = matches[ 0 ],
+          closed     = matches[ 1 ],
+          tag        = matches[ 2 ],
+          selfClosed = matches[ 3 ];
+
+      if ( closed && selfClosed )
+        throw new Error( 'An element cannot be both closed and self-closed.' );
 
       var obj = {
         el:    el,
@@ -62,19 +81,48 @@
         attrs: mailjs.parseAttrs( el.substring( tag.length, el.length - 1 ) )
       };
 
-      if ( matches[ 2 ] )
-        obj.term = true;
+      if ( closed ) {
+        obj.close = true;
+
+        if ( Object.keys( obj.attrs ).length )
+          throw new Error( 'Closed elements should not contain attributes.' );
+
+      } else if ( selfClosed ) {
+        obj.selfClose = true;
+      }
 
       return obj;
     },
 
-    generate: function( opts ) {
-      var src       = opts.src,
-          binds     = opts.binds || {},
+    render: function( opts ) {
+      var binds     = opts.binds || {},
           templates = opts.templates || {},
           html      = opts.html,
-          attrs     = opts.attrs || {}
-          dest      = '';
+
+          el        = opts.el,
+          template  = opts.template,
+
+          src,
+          dest      = '',
+
+          close     = opts.close || ( el && el.close );
+
+      if ( template ) {
+        if ( html )
+          src = close ? template.htmlClose : template.html;
+        else
+          src = close ? template.textClose : template.text;
+
+        if ( !src )
+          src = close ? template.srcClose : template.src;
+
+        if ( close && !src )
+          throw new Error( 'Closing elements not supported for template: ' + ( el ? el.el : '' ) );
+      } else {
+        src = opts.src;
+      }
+
+      src = src || '';
 
       for ( var si=0, slen=src.length; si < slen; ) {
         ch = src[ si ];
@@ -89,27 +137,21 @@
           break;
 
         case '[':
-          //var end  = si+1 < slen && src[ si + 1 ] == '/';
-          //if ( ch === '/' ) {
-            //end = true;
-            //si++;
-          //}
+          var cEl = mailjs.parseElement( src.substring( si ) );
 
-          var el = mailjs.parseElement( src.substring( si ) );
+          var cTemplate = mailjs.resolve( cEl.tag, templates );
 
-          var template = mailjs.resolve( el.tag, templates );
+          if ( cTemplate ) {
 
-          if ( template ) {
-
-            dest += mailjs.generate({
-              src:       template.src,
+            dest += mailjs.render({
+              template:  cTemplate,
+              el:        cEl,
               binds:     binds,
               html:      html,
-              templates: templates,
-              attrs:     el.attrs
+              templates: templates
             });
 
-            si += el.el.length;
+            si += cEl.el.length;
           } else {
             dest += '[';
             si++;
@@ -128,7 +170,7 @@
           var name = matches[ 1 ] || matches[ 2 ];
           si += matches[ 0 ].length;
 
-          var bind = attrs[ name ] || binds[ name ];
+          var bind = ( el && el.attrs[ name ] ) || binds[ name ] || ( template && template.defaults[ name ] );
           if ( !bind )
             throw new Error( 'No bind definition for: ' + name );
 
