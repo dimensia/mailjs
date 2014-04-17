@@ -9,7 +9,7 @@
   var whitespaceChar = /\s/,
       attrNameChar   = /[^\t\n\f \/>"'=]/;
 
-      globalTemplates = {
+  var builtinTemplates = {
     doctype: {
       src: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
     },
@@ -23,6 +23,8 @@
     }
   };
 
+  var builtinBinds = {
+  };
 
   var mailjs = {
 
@@ -32,17 +34,34 @@
       mailjs.opts = opts;
     },
 
-    resolve: function( tag, templates ) {
-      var o = templates && templates[ tag ];
+    resolveTemplate: function( name, templates ) {
+      return (
+        ( templates && templates[ name ] ) ||
+        ( this.opts.templates && this.opts.templates[ name ] ) ||
+        builtinTemplates[ name ]
+      );
+    },
 
-      if ( o )
-        return o;
+    // returns a bind ... null means no bind, '' means a bind was found and it was intentionally blank
+    resolveBind: function( name, el, binds, template ) {
+      var rslt =
+        ( el && el.attrs[ name ] ) ||
+        binds[ name ] ||
+        ( template && template.defaults && template.defaults[ name ] ) ||
+        ( this.opts.binds && this.opts.binds[ name ] ) ||
+        builtinBinds[ name ];
 
-      o = this.opts.templates && this.opts.templates[ tag ];
-      if ( o )
-        return o;
-
-      return globalTemplates[ tag ];
+      if ( rslt )
+        return rslt;
+      else
+        return (
+          // "string != null" means "string !== null && string !== undefined", intentional
+          ( el && el.attrs[ name ] != null ) ||
+          binds[ name ] != null ||
+          ( template && template.defaults && template.defaults[ name ] != null ) ||
+          ( this.opts.binds && this.opts.binds[ name ] != null ) ||
+          builtinBinds[ name ]
+        ) ? '' : null;
     },
 
     parseAttrs: function( s ) {
@@ -113,10 +132,10 @@
         else
           src = close ? template.textClose : template.text;
 
-        if ( !src )
+        if ( src == null )
           src = close ? template.srcClose : template.src;
 
-        if ( close && !src )
+        if ( close && src == null )
           throw new Error( 'Closing elements not supported for template: ' + ( el ? el.el : '' ) );
       } else {
         src = opts.src;
@@ -139,7 +158,7 @@
         case '[':
           var cEl = mailjs.parseElement( src.substring( si ) );
 
-          var cTemplate = mailjs.resolve( cEl.tag, templates );
+          var cTemplate = mailjs.resolveTemplate( cEl.tag, templates );
 
           if ( cTemplate ) {
 
@@ -170,9 +189,16 @@
           var name = matches[ 1 ] || matches[ 2 ];
           si += matches[ 0 ].length;
 
-          var bind = ( el && el.attrs[ name ] ) || binds[ name ] || ( template && template.defaults[ name ] );
-          if ( !bind )
+          var bind = this.resolveBind( name, el, binds, template );
+          if ( bind == null )
             throw new Error( 'No bind definition for: ' + name );
+
+          bind = mailjs.render({
+            src:       bind,
+            binds:     binds,
+            html:      html,
+            templates: templates
+          });
 
           dest += bind;
           break;

@@ -107,11 +107,15 @@ describe( 'element parser', function() {
 describe( 'generation', function() {
   before( function() {
     mailjs.config({
+      binds: {
+        fontFamily: 'font-family:Helvetica, Arial, sans-serif'
+      },
       templates: {
         btn: {
-          html: '<a style="color:#ffffff;width:$width;" href="$href">$label</a>',
+          html: '<a style="${style}color:#ffffff;width:$width;" href="$href">$label</a>',
           text: '$label: $href',
           defaults: {
+            style: '',
             width: '300px'
           }
         }
@@ -153,6 +157,21 @@ describe( 'generation', function() {
       })
     ).to.eql(
       'Hello, Jane.'
+    );
+  });
+
+  it( 'should process simple binds using ES6-style template syntax - ${}', function() {
+    expect(
+      mailjs.render({
+        src: 'Hello, ${firstName}${space}$lastName.',
+        binds: {
+          firstName: 'Jane',
+          lastName:  'Anderson',
+          space:     ' '
+        }
+      })
+    ).to.eql(
+      'Hello, Jane Anderson.'
     );
   });
 
@@ -200,6 +219,48 @@ describe( 'generation', function() {
         src: '[btn href="https://apple.com" label="Visit Apple"]sample text[/btn].'
       })
     }).to.throw( /Closing elements not supported/ );
+  });
+
+  it( 'should process config()ured binds', function() {
+    expect(
+      mailjs.render({
+        src: '[btn style="$fontFamily;" href="https://apple.com" label="Visit Apple"].',
+        html: true
+      })
+    ).to.equal(
+      '<a style="font-family:Helvetica, Arial, sans-serif;color:#ffffff;width:300px;" href="https://apple.com">Visit Apple</a>.'
+    );
+  });
+
+  it( 'should allow bindings to contain template references', function() {
+    expect(
+      mailjs.render({
+        src: 'This is $myBtn.',
+        html: true,
+        binds: {
+          myBtn: '[btn href="https://apple.com" label="Visit Apple"]'
+        }
+      })
+    ).to.equal(
+      'This is <a style="color:#ffffff;width:300px;" href="https://apple.com">Visit Apple</a>.'
+    );
+  });
+
+  it( 'should allow bindings to contain references to other bindings', function() {
+    expect(
+      mailjs.render({
+        src: 'This is $myText.',
+        binds: {
+          myText:    '$color and $name',
+          color:     '#000',
+          name:      '$firstName $lastName',
+          firstName: 'Jill',
+          lastName:  'Anderson'
+        }
+      })
+    ).to.equal(
+      'This is #000 and Jill Anderson.'
+    );
   });
 });
 
