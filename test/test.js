@@ -102,6 +102,15 @@ describe( 'element parser', function() {
       return mailjs.parseElement( '[/a style="color:#000;"]' )
     }).to.throw( /Closed elements should not contain attributes/ );
   });
+
+  it( 'should parse tag-value elements', function() {
+    expect(
+      mailjs.parseElement( '[email="support@apple.com"]' )
+    ).to.eql(
+      { el: '[email="support@apple.com"]', tag: 'email', attrs: { email: 'support@apple.com' } }
+    )
+  });
+
 });
 
 describe( 'generation', function() {
@@ -193,6 +202,23 @@ describe( 'generation', function() {
     );
   });
 
+  it( 'should process tag-value templates', function() {
+    expect(
+      mailjs.render({
+        src: 'Email us at [email="support@apple.com"].',
+        templates: {
+          email: {
+            html: '<a href="mailto:$email">$email</a>',
+            text: '$email'
+          }
+        },
+        html: true
+      })
+    ).to.eql(
+      'Email us at <a href="mailto:support@apple.com">support@apple.com</a>.'
+    );
+  });
+
   it( 'should process text & html templates', function() {
     expect(
       mailjs.render({
@@ -249,17 +275,49 @@ describe( 'generation', function() {
   it( 'should allow bindings to contain references to other bindings', function() {
     expect(
       mailjs.render({
-        src: 'This is $myText.',
+        src: 'It is true that $statement.',
         binds: {
-          myText:    '$color and $name',
-          color:     '#000',
-          name:      '$firstName $lastName',
-          firstName: 'Jill',
-          lastName:  'Anderson'
+          statement:  '$name is a $profession',
+          profession: 'programmer',
+          name:       '$firstName $lastName',
+          firstName:  'Jill',
+          lastName:   'Anderson'
         }
       })
     ).to.equal(
-      'This is #000 and Jill Anderson.'
+      'It is true that Jill Anderson is a programmer.'
+    );
+  });
+
+  it( 'should render closed elements correctly', function() {
+    expect(
+      mailjs.render({
+        src: 'This is [boxed]contained[/boxed].',
+        templates: {
+          boxed: {
+            src: '\\[',
+            srcClose: '\\]'
+          }
+        }
+      })
+    ).to.equal(
+      'This is [contained].'
+    );
+  });
+
+  it( 'should render self-closed elements correctly', function() {
+    expect(
+      mailjs.render({
+        src: 'This is [boxed/].',
+        templates: {
+          boxed: {
+            src: '\\[',
+            srcClose: '\\]'
+          }
+        }
+      })
+    ).to.equal(
+      'This is [].'
     );
   });
 });

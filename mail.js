@@ -88,17 +88,33 @@
 
       var el         = matches[ 0 ],
           closed     = matches[ 1 ],
-          tag        = matches[ 2 ],
+          tagDef     = matches[ 2 ],
           selfClosed = matches[ 3 ];
 
       if ( closed && selfClosed )
         throw new Error( 'An element cannot be both closed and self-closed.' );
 
+      var tag, tagVal;
+      if ( tagDef.indexOf( '=' ) != -1 ) {
+        var tmatches = tagDef.match( /([^\s=,]+)\s*=\s*(?:'([^']+)'|"([^"]+)"|(\S+))/ );
+
+        if ( !tmatches )
+          throw new Error( 'Unable to parse tag-value at: ' + tagDef );
+
+        tag = tmatches[ 1 ];
+        tagVal = tmatches[ 2 ] || tmatches[ 3 ] || tmatches[ 4 ];
+      } else {
+        tag = tagDef;
+      }
+
       var obj = {
         el:    el,
         tag:   tag,
-        attrs: mailjs.parseAttrs( el.substring( tag.length, el.length - 1 ) )
+        attrs: mailjs.parseAttrs( el.substring( tagDef.length, el.length - 1 ) )
       };
+
+      if ( tagVal != null )
+        obj.attrs[ tag ] = tagVal;
 
       if ( closed ) {
         obj.close = true;
@@ -206,6 +222,12 @@
         default:
           dest += src[ si++ ];
         }
+      }
+
+      if ( el && !opts.close && el.selfClose ) {
+        opts.close = true;
+        dest += mailjs.render( opts );
+        delete opts.close;
       }
 
       return dest;
