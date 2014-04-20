@@ -1,5 +1,33 @@
 
 body {
   background: #eee;
+  font-family: 'Oxygen', sans-serif;
+  margin: 0;
+}
+
+.header {
+  font-size: 52px;
+  background: #22bbdd;
+  padding: 20px;
+  color: #fff;
+  font-weight: normal;
+  border-bottom: 1px solid #666;
+  text-shadow: 0.1em 0.1em 0.1em #0588bb;
+  text-align: center;
+}
+
+.body {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+pre {
+  margin: 0;
+  padding: 8px 16px;
+  background: #e2e2e2;
+}
+
+code {
+  font-family: 'Inconsolata', Monaco, Menlo, 'Courier New', Courier, monospace;
 }
 
