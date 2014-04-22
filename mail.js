@@ -194,6 +194,9 @@ a:hover { color: green; }
 //@media only screen and (-webkit-device-pixel-ratio:1.5){
   // Put CSS for high density (hdpi) Android layouts in here
 //}
+
+  '$styleBlock' +
+
 '</style>\n'
     },
 
