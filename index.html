@@ -14,6 +14,7 @@
  </head>
 
  <body>
+  <a href="https://github.com/dimensia/mailjs"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
   <div class="header">
    <i class="fa fa-envelope-o"></i>
    Mail.js
@@ -105,17 +106,10 @@
     <pre class="code">src: 'Hello $firstName ${lastName},'</pre>
     <div class="example">Bind Usage Example</div>
 
-    <p>Mail.js' builtin email boilerplate has several bind hooks that you can optionally override:</p>
-    <ul>
-     <li><span class="code"><b>$title</b></span> - Used as a title of the email.  Optional.
-     <li><span class="code"><b>$headBlock</b></span> - Extra styles to be placed in the head style block.
-    </ul>
-   </div>
-
     <h4>Templates</h4>
 
     <p>
-     Templates are more advanced bindings.  And provide a number of options:
+     Templates are a more advanced form of binding.  Template options are:
     </p>
 <pre class="code"><span class="desc">template options</span>: {
   <b>html</b>: <span class="desc">A string containing the HTML to display for this template when rendering HTML.</span>
@@ -149,6 +143,35 @@
 
     <pre class="code">src: '[email="$companyUrl" label="a label"]'</pre>
 
+    <h4>Builtin Bindings and Templates</h4>
+
+    <p>The following builtin bindings are available to override:</p>
+    <ul>
+     <li><span class="code"><b>$title</b></span> - Used as a title of the email.  Optional.
+     <li><span class="code"><b>$headBlock</b></span> - Extra styles to be placed in the head style block.
+    </ul>
+
+    <p>The following templates are available, they incorporate a lot of <a href="#emailBoilerplate">email boilerplate</a> to increase portability of rendering:<p>
+    <ul>
+     <li><span class="code"><b>html</b></span> - Default definition for the <b>html</b> tag.  Supports closing tag.
+     <li><span class="code"><b>head</b></span> - Default definition for the <b>head</b> tag.  Supports closing tag.
+    </ul>
+   
+    <p>
+     The special built-in <b>wrapper</b> template is automatically wrapped around all <span class="code">render</span> calls.
+     By default it contains the following (but you can override it in your <span class="code">mailjs.config</span> call):
+    </p>
+    <pre class="code">wrapper: {
+  html:
+    '[html]\n' +
+    '[head/]\n' +
+     '&lt;body&gt;\n',
+  htmlClose:
+     '&lt;/body&gt;\n' +
+    '[/html]'
+}</pre>
+    <div class="example">Default <span class="code">wrapper</span> template</div>
+
    <div>
     <h3>Example</h3>
 
@@ -159,11 +182,20 @@
     company: 'ACME Corp'
   },
   templates: {
-    page: {
-      html:  '&lt;div style="color:#222;font-weight:bold;"&gt;ACME Corp&lt;div&gt;',
-      text:  'ACME Corp\\n---------\\n\\n',
-      htmlClose:  '&lt;div style="color:#ccc;font-size:12px;"&gt;Copyright 2014&lt;div&gt;',
-      textClose:  'Copyright 2014'
+    wrapper: {
+      html:
+        '[html]' +
+         '[head/]' +
+         '&lt;body&gt;' +
+          '&lt;div style="color:#222;font-weight:bold;"&gt;ACME Corp&lt;div&gt;',
+      htmlClose:
+          '&lt;div style="color:#ccc;font-size:12px;"&gt;Copyright 2014&lt;div&gt;' +
+         '&lt;/body&gt;' +
+        '[/html]'
+      text:
+        'ACME Corp\n---------\n\n',
+      textClose:
+        'Copyright 2014'
     },
     email: {
       html: '&lt;a href="mailto:$email"&gt;$email</a>',
@@ -176,7 +208,7 @@
     <p>A simple <span class="code">render</span> example:</p>
 
 <pre class="code">mailjs.render({
-  src: '[page]Thank you for your order.  Contact us at [email=$companyEmail][/page]',
+  src: 'Thank you for your order.  Contact us at [email=$companyEmail]',
   binds: {
     title: '$company -- Order Complete'
   },
@@ -190,7 +222,7 @@
     <h3>Resources</h3>
 
     <ul>
-     <li><a href="http://htmlemailboilerplate.com/">HTML Email Boilerplate</a></li>
+     <li><a id="emailBoilerplate" href="http://htmlemailboilerplate.com/">HTML Email Boilerplate</a></li>
      <li><a href="http://www.campaignmonitor.com/css/">Campaign Monitor's Ultimate Guide to CSS</a></li>
      <li><a href="http://templates.mailchimp.com/">Mailchimp's Email Design Reference</a></li>
      <li><a href="http://www.emailonacid.com/">Email on Acid</a> - Great tool for testing the output of your emails across dozens of email readers.</li>
@@ -201,7 +233,16 @@
     <h3>Support</h3>
 
     <a href="https://github.com/dimensia/mailjs/issues">Submit an issue and/or view existing issues</a>
-  </div>
+   </div>
+
+   <div>
+    <h3>Contribute</h3>
+
+    <p>
+     Email rendering is an ongoing issue to tackle and is constantly changing as email clients are updated and new ones created.  Pull requests
+     and other contributions to this project are greatly welcome!
+   </div>
+
    <div>
     <h3>License</h3>
 
