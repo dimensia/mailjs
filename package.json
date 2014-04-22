@@ -1,6 +1,6 @@
 {
   "name": "mailjs",
-  "version": "0.0.3",
+  "version": "0.1.1",
   "description": "JavaScript HTML and text email formatter.",
   "main": "mail.js",
   "dependencies": {},
