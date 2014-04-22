@@ -24,7 +24,7 @@
    <div>
     <h3>What</h3>
     <p>
-     Mail.js is an open-source JavaScript library designed to help <b>format</b> email.
+     Mail.js is an open-source JavaScript library designed to help <b>render</b> email.
     </p>
     <p>
      Note that Mail.js is <i>not</i> a mail transport -- Mail.js works <i>with</i> mail transport packages like
@@ -47,7 +47,7 @@
     <h3>How</h3>
 
     Mail.js uses a simple template system which allows you to simply craft your emails while making it easy to generate both
-    text and HTML messages from the same source.  It also bakes in <a href="http://htmlemailboilerplate.com/">HTML Email Boilerplate</a> behind
+    text and HTML messages from the same source.  It also bakes in email boilerplate like <a href="http://htmlemailboilerplate.com/">HTML Email Boilerplate</a> behind
     the scenes to solve many of the email rendering idiosyncrasies across email renderers.
    </div>
 
@@ -63,16 +63,142 @@
 
    <div>
     <h3>API</h3>
-    WIP
+
+    <h4>Methods</h4>
+
+    <p><span class="code">mailjs.config()</span> configures Mail.js options:</p>
+    <pre><code>mailjs.config({
+  <b>binds</b>: <span class="desc">An object containing common bind definitions.</span>
+  <b>templates</b>: <span class="desc">An object containing common template definitions.</span>
+});
+</code></pre>
+
+    <p><span class="code">mailjs.render()</span> formats email:</p>
+    <pre><code>mailjs.render({
+  <b>src</b>: <span class="desc">A string containing the template to render.</span>
+  <b>binds</b>: <span class="desc">An object containing bind definitions that will be available while processing this render.</span>
+  <b>templates</b>: <span class="desc">An object containing template definitions that will be available while processing this render.</span>
+  <b>html</b>: <span class="desc">A boolean indicating whether HTML (true) or text (false) should be rendered.</span>
+});
+</code></pre>
+
+    <h4>Rendering Emails</h4>
+
+    <p>
+     Mail.js uses <i>binds</i> and <i>templates</i> to render email.
+    </p>
+    <p>
+     Bindings and templates are <i>late bound</i> -- this means you can provide a definition for a binding or template
+     <i>after</i> it has been defined.
+    </p>
+    <p>
+     Bindings and templates can also recursively reference other bindings and templates.  (Be careful not to cause
+     infinite recursive cycles.)
+    </p>
+
+    <h4>Binds</h4>
+
+    <p>
+     Binds are simple variables bindings and are essentially lightweight templates.  Their syntax is similar to string interpolation in
+     EcmaScript 6.
+    </p>
+    <pre class="code">src: 'Hello $firstName ${lastName},'</pre>
+    <div class="example">Bind Usage Example</div>
+
+    <p>Mail.js' builtin email boilerplate has several bind hooks that you can optionally override:</p>
+    <ul>
+     <li><span class="code"><b>$title</b></span> - Used as a title of the email.  Optional.
+     <li><span class="code"><b>$headBlock</b></span> - Extra styles to be placed in the head style block.
+    </ul>
    </div>
+
+    <h4>Templates</h4>
+
+    <p>
+     Templates are more advanced bindings.  And provide a number of options:
+    </p>
+<pre class="code"><span class="desc">template options</span>: {
+  <b>html</b>: <span class="desc">A string containing the HTML to display for this template when rendering HTML.</span>
+  <b>text</b>: <span class="desc">A string containing the text to display for this template when rendering text.</span>
+  <b>src</b>: <span class="desc">A string that will work for both HTML and text rendering.  If specifing <b>html</b> and <b>text</b>, do not specify <b>src</b>.</span>
+  <b>htmlClose</b>: <span class="desc">HTML string for closing template tags.</span>
+  <b>textClose</b>: <span class="desc">Text string for closing template tags.</span>
+  <b>srcClose</b>: <span class="desc">A string that will work for both HTML and text rendering for closing template tags.</span>
+  <b>binds</b>: <span class="desc">An object containing bind definitions that will be added to the scope when processing this template.</span>
+  <b>templates</b>: <span class="desc">An object containing template definitions that will be added to the scope when processing this template.</span>
+}</pre>
+    <div class="example">Template Options</div>
+
+    <p>
+     It is often possible to use <span class="code">src</span>-style tags because the template string can contain references to other templates that abstract the
+     differences between HTML and text.  Essentially if you abstract the differences between HTML and text into simple templates then your composite
+     directives will tend to be more reusable across HTML and text.
+    </p>
+    <p>
+     Templates syntax is similar to HTML's use of angular brackets, but with square brackets instead:
+    </p>
+    <pre class="code">src: '[a href="$companyUrl"]our url[/a]'</pre>
+    <div class="example">Template Usage Example</div>
+
+    <p>
+     A shortcut to assign a parameter with the same name as the template exists.  The following two are equivalent:
+    </p>
+    <pre class="code">src: '[email email="$companyUrl" label="a label"]'</pre>
+
+    <p>The following is a shortcut of the preceding:</p>
+
+    <pre class="code">src: '[email="$companyUrl" label="a label"]'</pre>
 
    <div>
     <h3>Example</h3>
-    WIP
+
+    <p>Use the <span class="code">config</span> to define common bindings and templates:</p>
+
+<pre class="code">mailjs.config({
+  binds: {
+    company: 'ACME Corp'
+  },
+  templates: {
+    page: {
+      html:  '&lt;div style="color:#222;font-weight:bold;"&gt;ACME Corp&lt;div&gt;',
+      text:  'ACME Corp\\n---------\\n\\n',
+      htmlClose:  '&lt;div style="color:#ccc;font-size:12px;"&gt;Copyright 2014&lt;div&gt;',
+      textClose:  'Copyright 2014'
+    },
+    email: {
+      html: '&lt;a href="mailto:$email"&gt;$email</a>',
+      text: '$email'
+    }
+  }
+});</pre>
+    <div class="example">Mail.js <span class="code"><b>config</b></span> example</div>
+
+    <p>A simple <span class="code">render</span> example:</p>
+
+<pre class="code">mailjs.render({
+  src: '[page]Thank you for your order.  Contact us at [email=$companyEmail][/page]',
+  binds: {
+    title: '$company -- Order Complete'
+  },
+  html: true
+}</pre>
+    <div class="example">Mail.js <span class="code"><b>render</b></span> example</div>
+
    </div>
 
    <div>
-    <h3>Issues &amp; Support</h3>
+    <h3>Resources</h3>
+
+    <ul>
+     <li><a href="http://htmlemailboilerplate.com/">HTML Email Boilerplate</a></li>
+     <li><a href="http://www.campaignmonitor.com/css/">Campaign Monitor's Ultimate Guide to CSS</a></li>
+     <li><a href="http://templates.mailchimp.com/">Mailchimp's Email Design Reference</a></li>
+     <li><a href="http://www.emailonacid.com/">Email on Acid</a> - Great tool for testing the output of your emails across dozens of email readers.</li>
+    </ul>
+   </div>
+
+   <div>
+    <h3>Support</h3>
 
     <a href="https://github.com/dimensia/mailjs/issues">Submit an issue and/or view existing issues</a>
   </div>
@@ -100,6 +226,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.</pre>
+    <div class="example">Open Source License</div>
   </div>
  </body>
 </html>
