@@ -58,6 +58,11 @@
     <pre><code>npm install mailjs <i>--save</i></code></pre>
 
     <p>
+     Mail.js supports CommonJS- and AMD-style module bindings.  If neither module system is detected it will expose a global <span class="code"><b>mailjs</b></span> variable.  Mail.js is intended to be run inside
+     Node.js but nothing prohibits it being used in a web browser.  Mail.js has no dependencies.
+    </p>
+
+    <p>
      Mail.js is hosted on <a href="https://github.com/dimensia/mailjs"><i class="fa fa-github"></i> Github</a>.
     </p>
    </div>
@@ -143,6 +148,12 @@
 
     <pre class="code">src: '[email="$companyUrl" label="a label"]'</pre>
 
+    <h4>Escape Character</h4>
+
+    <p>If you need to use the <span class="code">$</span>, <span class="code">[</span>, or <span class="code">\</span> characters, escape them using the backslash <span class="code">\</span> character.
+    <pre class="code">$firstName owes $vendor \$50.00</pre>
+    <div class="example">Escape Character Example</div>
+
     <h4>Builtin Bindings and Templates</h4>
 
     <p>The following builtin bindings are available to override:</p>
@@ -175,7 +186,7 @@
    <div>
     <h3>Example</h3>
 
-    <p>Use the <span class="code">config</span> to define common bindings and templates:</p>
+    <p>Use <span class="code">mailjs.config()</span> to define common bindings and templates:</p>
 
 <pre class="code">mailjs.config({
   binds: {
