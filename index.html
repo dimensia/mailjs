@@ -58,8 +58,11 @@
     <pre><code>npm install mailjs <i>--save</i></code></pre>
 
     <p>
-     Mail.js supports CommonJS- and AMD-style module bindings.  If neither module system is detected it will expose a global <span class="code"><b>mailjs</b></span> variable.  Mail.js is intended to be run inside
-     Node.js but nothing prohibits it being used in a web browser.  Mail.js has no dependencies.
+     Mail.js supports CommonJS- and AMD-style module bindings.  If neither module system is detected it will expose a global <span class="code"><b>mailjs</b></span> variable.
+    </p>
+    
+    <p>
+     Mail.js is intended to be run inside Node.js but nothing prohibits it being used in a web browser.  Mail.js has no dependencies.
     </p>
 
     <p>
@@ -95,7 +98,7 @@
     </p>
     <p>
      Bindings and templates are <i>late bound</i> -- this means you can provide a definition for a binding or template
-     <i>after</i> it has been defined.
+     <i>after</i> it has been referenced.
     </p>
     <p>
      Bindings and templates can also recursively reference other bindings and templates.  (Be careful not to cause
@@ -118,7 +121,7 @@
     </p>
 <pre class="code"><span class="desc">template options</span>: {
   <b>html</b>: <span class="desc">A string containing the HTML to display for this template when rendering HTML.</span>
-  <b>text</b>: <span class="desc">A string containing the text to display for this template when rendering text.</span>
+  <b>text</b>: <span class="desc">A string containing the text to display for this template when rendering text.  If <b>html</b> is provided, but this is left blank, it will default to ''.</span>
   <b>src</b>: <span class="desc">A string that will work for both HTML and text rendering.  If specifing <b>html</b> and <b>text</b>, do not specify <b>src</b>.</span>
   <b>htmlClose</b>: <span class="desc">HTML string for closing template tags.</span>
   <b>textClose</b>: <span class="desc">Text string for closing template tags.</span>
@@ -131,7 +134,7 @@
     <p>
      It is often possible to use <span class="code">src</span>-style tags because the template string can contain references to other templates that abstract the
      differences between HTML and text.  Essentially if you abstract the differences between HTML and text into simple templates then your composite
-     directives will tend to be more reusable across HTML and text.
+     templates will tend to be more reusable across HTML and text.
     </p>
     <p>
      Templates syntax is similar to HTML's use of angular brackets, but with square brackets instead:
@@ -147,6 +150,11 @@
     <p>The following is a shortcut of the preceding:</p>
 
     <pre class="code">src: '[email="$companyUrl" label="a label"]'</pre>
+
+    <p>
+     If none of the <span class="code">*Close</span> options are supplied, the template cannot be used with either self-closing tag (i.e. <span class="code">[a <i>...</i> /]</span>)
+     or a standalone close tag (i.e. <span class="code">[/a]</span>) and Mail.js will throw an exception.
+    </p>
 
     <h4>Escape Character</h4>
 
@@ -219,7 +227,7 @@
     <p>A simple <span class="code">render</span> example:</p>
 
 <pre class="code">mailjs.render({
-  src: 'Thank you for your order.  Contact us at [email=$companyEmail]',
+  src: 'Thank you for your order.  Contact us at [email=$companyEmail] if you have any problems.',
   binds: {
     title: '$company -- Order Complete'
   },
