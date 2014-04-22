@@ -127,6 +127,10 @@ describe( 'generation', function() {
             style: '',
             width: '300px'
           }
+        },
+        wrapper: {
+          src: '',
+          srcClose: ''
         }
       }
     });

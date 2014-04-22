@@ -17,9 +17,29 @@
   var whitespaceChar = /\s/,
       attrNameChar   = /[^\t\n\f \/>"'=]/;
 
+  var builtinBinds = {
+    title: '',
+    headStyle: ''
+  };
+
   var builtinTemplates = {
     doctype: {
       src: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
+    },
+
+    wrapper: {
+      html:
+        '[html]\n' +
+         '[head/]\n' +
+         '<body>\n',
+
+      text: '',
+
+      htmlClose:
+         '</body>\n' +
+        '</html>',
+
+      textClose: '',
     },
 
     html: {
@@ -30,14 +50,25 @@
         '</html>'
     },
 
-    headTags: {
+    head: {
       html:
-        '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
-        '<meta name="viewport" content="width=device-width, initial-scale=1.0"/>\n' +
-        '<title>$title</title>'
+        '<head>\n' +
+         '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
+         '<meta name="viewport" content="width=device-width, initial-scale=1.0"/>\n' +
+         '<title>$title</title>\n' +
+         '<style>\n' +
+          '$headStyle\n' +
+         '</style>\n',
+
+      htmlClose:
+        '</head>'
     },
 
-    headStyle: {
+    borderRadius: {
+      html: '-moz-border-radius:$borderRadius;-webkit-border-radius:$borderRadius;border-radius:$borderRadius'
+    },
+
+    headStyles: {
       html: 
 
 '#outlook a {padding:0;}\n' + // Force Outlook to provide a "view in browser" menu link.
@@ -205,9 +236,6 @@ a:hover { color: green; }
     }
   };
 
-  var builtinBinds = {
-  };
-
   var mailjs = {
 
     opts: {},
@@ -242,7 +270,7 @@ a:hover { color: green; }
           binds[ name ] != null ||
           ( template && template.defaults && template.defaults[ name ] != null ) ||
           ( this.opts.binds && this.opts.binds[ name ] != null ) ||
-          builtinBinds[ name ]
+          builtinBinds[ name ] != null
         ) ? '' : null;
     },
 
@@ -341,6 +369,9 @@ a:hover { color: green; }
 
       src = src || '';
 
+      if ( !opts.inside )
+        src = '[wrapper]' + src + '[/wrapper]';
+
       for ( var si=0, slen=src.length; si < slen; ) {
         ch = src[ si ];
 
@@ -365,7 +396,8 @@ a:hover { color: green; }
               el:        cEl,
               binds:     binds,
               html:      html,
-              templates: templates
+              templates: templates,
+              inside:    true
             });
 
             si += cEl.el.length;
@@ -395,7 +427,8 @@ a:hover { color: green; }
             src:       bind,
             binds:     binds,
             html:      html,
-            templates: templates
+            templates: templates,
+            inside:    true
           });
 
           dest += bind;
@@ -407,9 +440,12 @@ a:hover { color: green; }
       }
 
       if ( el && !opts.close && el.selfClose ) {
+        var savedInside = opts.inside;
         opts.close = true;
+        opts.inside = true;
         dest += mailjs.render( opts );
         delete opts.close;
+        opts.inside = savedInside;
       }
 
       return dest;
