@@ -326,3 +326,37 @@ describe( 'generation', function() {
   });
 });
 
+describe( 'generation with boilerplate', function() {
+  before( function() {
+    mailjs.config({
+      binds: {
+        fontFamily: 'font-family:Helvetica, Arial, sans-serif'
+      },
+      templates: {
+        btn: {
+          html: '<a style="${style}color:#ffffff;width:$width;" href="$href">$label</a>',
+          text: '$label: $href',
+          defaults: {
+            style: '',
+            width: '300px'
+          }
+        }
+      }
+    });
+  });
+
+  after( function() {
+    mailjs.config({});
+  });
+
+  it( 'should render still render simple text', function() {
+    expect(
+      mailjs.render({
+        src: 'This is a simple email.'
+      })
+    ).to.eql(
+      'This is a simple email.'
+    );
+  });
+});
+

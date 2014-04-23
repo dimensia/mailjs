@@ -33,13 +33,9 @@
          '[head/]\n' +
          '<body>\n',
 
-      text: '',
-
       htmlClose:
          '</body>\n' +
-        '</html>',
-
-      textClose: '',
+        '</html>'
     },
 
     html: {
@@ -68,6 +64,50 @@
       html: '-moz-border-radius:$borderRadius;-webkit-border-radius:$borderRadius;border-radius:$borderRadius'
     },
 
+    table: {
+      html:
+        '<table border="0" cellpadding="0" cellspacing="0" style="$style">',
+      htmlClose:
+        '</table>',
+      defaults: {
+        style: ''
+      }
+    },
+
+    /*
+     * Outlook doesn't support margins or padding on block-level elements, so we use tables instead of simple divs
+     */
+    tdiv: {
+      html:
+        '[table style="width:100%"]' +
+         '<tr>' +
+          '<td style="$style">',
+      htmlClose:
+          '</td>' +
+         '</tr>' +
+        '[/table]',
+      defaults: {
+        style: ''
+      }
+    },
+
+    p: {
+      htmlOpen: '<br><br><p style="margin:0;$style">',
+      htmlClose: '</p>',
+      textOpen: '\n',
+      textClose: '',
+      defaults: {
+        style: ''
+      }
+    },
+
+    imglink: {
+      html: '<a href="$href" style="border:none;"><img style="height:$height;" src="$src"></a>',
+      text: '$href',
+      defaults: {
+      }
+    },
+
     headStyles: {
       html: 
 
@@ -88,8 +128,6 @@
  * 2. "border:none" removes border when linking images.
  * 3. Updated the common Gmail/Hotmail image display fix: Gmail and Hotmail unwantedly adds in an extra space below images when using non IE browsers.
  *    You may not always want all of your images to be block elements. Apply the "image_fix" class to any image you need to fix.
- *
- * Bring inline: Yes.
  */
 'img {outline:none; text-decoration:none; -ms-interpolation-mode: bicubic;}\n' +
 'a img {border:none;}\n' +
@@ -99,17 +137,16 @@
  * Simple fix with little effect on other styling. NOTE: It is also common to use two breaks instead of the paragraph tag but I think this way is cleaner
  * and more semantic. NOTE: This example recommends 1em. More info on setting web defaults: http://www.w3.org/TR/CSS21/sample.html or
  * http://meiert.com/en/blog/20070922/user-agent-style-sheets/
- *
- * Bring inline: Yes.
+ * ... but the above doesn't deal with 
+ * http://www.emailonacid.com/blog/details/C13/7_tips_and_tricks_regarding_margins_and_padding_in_html_emails
+ * use [p] element instead which does the double <br>
  */
-'p {margin: 1em 0;}\n' +
+'p {margin:0;margin-bottom:0;}\n' +
  
 /* Hotmail header color reset: Hotmail replaces your header color styles with a green color on H2, H3, H4, H5, and H6 tags. In this example, the color is
  * reset to black for a non-linked header, blue for a linked header, red for an active header (limited support), and purple for a visited header (limited
  * support).  Replace with your choice of color. The !important is really what is overriding Hotmail's styling. Hotmail also sets the H1 and H2 tags to
  * the same size.
- *
- * Bring inline: Yes.
  */
 'h1, h2, h3, h4, h5, h6 {color: black !important;}\n' +
  
@@ -130,15 +167,11 @@
  * http://www.campaignmonitor.com/blog/post/3392/1px-borders-padding-on-table-cells-in-outlook-07/
  * 
  * H/T @edmelly
- *
- * Bring inline: No.
  */
 'table td {border-collapse: collapse;}\n' +
  
 /* Styling your links has become much simpler with the new Yahoo.  In fact, it falls in line with the main credo of styling in email, bring your
  * styles inline.  Your link colors will be uniform across clients when brought inline.
- *
- * Bring inline: Yes.
  */
 'a {color: orange;}\n' +
  
@@ -361,7 +394,7 @@ a:hover { color: green; }
         if ( src == null )
           src = close ? template.srcClose : template.src;
 
-        if ( close && src == null )
+        if ( close && src == null && !template.htmlClose && !template.textClose )
           throw new Error( 'Closing elements not supported for template: ' + ( el ? el.el : '' ) );
       } else {
         src = opts.src;
