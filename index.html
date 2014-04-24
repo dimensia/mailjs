@@ -38,7 +38,7 @@
     Email is notoriously hard to format for correctly.  Two problems which this library attempts to help mitigate are:
 
     <ul>
-     <li>Email renderers vary <i>widely</i> in how they handle HTML
+     <li>Email clients vary <i>widely</i> in how they handle HTML
      <li>Formatting both text and HTML email messages without message duplication can be painful
     </ul>
     
@@ -84,7 +84,7 @@
 
     <p><span class="code">mailjs.render()</span> formats email:</p>
     <pre><code>mailjs.render({
-  <b>src</b>: <span class="desc">A string containing the template to render.</span>
+  <b>src</b>: <span class="desc">A string or <a href="#functionTemplates">function</a> containing the template to render.</span>
   <b>binds</b>: <span class="desc">An object containing bind definitions that will be available while processing this render.</span>
   <b>templates</b>: <span class="desc">An object containing template definitions that will be available while processing this render.</span>
   <b>html</b>: <span class="desc">A boolean indicating whether HTML (true) or text (false) should be rendered.</span>
@@ -108,11 +108,17 @@
     <h4>Binds</h4>
 
     <p>
-     Binds are simple variables bindings and are essentially lightweight templates.  Their syntax is similar to string interpolation in
+     Binds are simple text variables that are essentially lightweight templates.  Their syntax for usage is similar to string interpolation in
      EcmaScript 6.
     </p>
-    <pre class="code">src: 'Hello $firstName ${lastName},'</pre>
-    <div class="example">Bind Usage Example</div>
+    <pre class="code">src: 'Hello $firstName ${lastName},',
+binds: {
+  firstName: 'Jane',
+  lastName: 'Doe'
+}</pre>
+    <div class="example">Bind Usage and Definition Example</div>
+
+    <p>Bind definitions can also be <a href="#functionTemplates">function</a>s as well.</p>
 
     <h4>Templates</h4>
 
@@ -120,13 +126,13 @@
      Templates are a more advanced form of binding.  Template options are:
     </p>
 <pre class="code"><span class="desc">template options</span>: {
-  <b>html</b>: <span class="desc">A string containing the HTML to display for this template when rendering HTML.</span>
-  <b>text</b>: <span class="desc">A string containing the text to display for this template when rendering text.  If <b>html</b> is provided, but this is left blank, it will default to ''.</span>
-  <b>src</b>: <span class="desc">A string that will work for both HTML and text rendering.  If specifing <b>html</b> and <b>text</b>, do not specify <b>src</b>.</span>
-  <b>htmlClose</b>: <span class="desc">HTML string for closing template tags.</span>
-  <b>textClose</b>: <span class="desc">Text string for closing template tags.</span>
-  <b>srcClose</b>: <span class="desc">A string that will work for both HTML and text rendering for closing template tags.</span>
-  <b>binds</b>: <span class="desc">An object containing bind definitions that will be added to the scope when processing this template.</span>
+  <b>html</b>: <span class="desc">A string or <a href="#functionTemplates">function</a> containing the HTML to display for this template when rendering HTML.</span>
+  <b>text</b>: <span class="desc">A string or <a href="#functionTemplates">function</a> containing the text to display for this template when rendering text.  If <b>html</b> is provided, but this is left blank, it will default to ''.</span>
+  <b>src</b>: <span class="desc">A string or <a href="#functionTemplates">function</a> that will work for both HTML and text rendering.  If specifing <b>html</b> and <b>text</b>, do not specify <b>src</b>.</span>
+  <b>htmlClose</b>: <span class="desc">HTML string or <a href="#functionTemplates">function</a> for closing template tags.</span>
+  <b>textClose</b>: <span class="desc">Text string or <a href="#functionTemplates">function</a> for closing template tags.</span>
+  <b>srcClose</b>: <span class="desc">A string or <a href="#functionTemplates">function</a> that will work for both HTML and text rendering for closing template tags.</span>
+  <b>binds</b>: <span class="desc">An object containing bind definitions that will be added to the scope when processing this template.  This is also used to establish default values for optional template attributes.</span>
   <b>templates</b>: <span class="desc">An object containing template definitions that will be added to the scope when processing this template.</span>
 }</pre>
     <div class="example">Template Options</div>
@@ -162,6 +168,31 @@
     <pre class="code">$firstName owes $vendor \$50.00</pre>
     <div class="example">Escape Character Example</div>
 
+    <h4 id="functionTemplates">Template &amp; Binding Functions</h4>
+
+    <p>
+     All template strings and bindings can be a function returning a string instead of a string.  This function will be passed a Scope object that can be used to lookup the values of bindings.
+    </p>
+    <pre class="code">src: function( scope ) {
+  var size = scope.binding( 'size' );
+
+  return size !== 'large' ? '[regular]' : '[large]';
+}</pre>
+    <div class="example">Template Function Example</div>
+
+    <p>The Scope API is:</p>
+
+    <ul>
+     <li>
+      <span class="code"><b>binding( <i>name</i> )</b></span><br>
+      <span class="desc">Looks up a value for a binding by given <i>name</i>.</span>
+     </li>
+     <li>
+      <span class="code"><b>if( <i>name</i>, <i>truthy</i>, <i>falsey</i> )</b></span><br>
+      <span class="desc">If a binding by the name <i>name</i> exists, return <i>truthy</i> otherwise return <i>falsey</i> (if defined, if not return an empty string).</span>
+     </li>
+    </ul>
+
     <h4>Builtin Bindings and Templates</h4>
 
     <p>The following builtin bindings are available to override:</p>
@@ -174,6 +205,7 @@
     <ul>
      <li><span class="code"><b>html</b></span> - Default definition for the <b>html</b> tag.  Supports closing tag.
      <li><span class="code"><b>head</b></span> - Default definition for the <b>head</b> tag.  Supports closing tag.
+     <li><span class="code"><b>tdiv</b></span> - A table-based replacement for the HTML DIV tag.  Some email renderers ignore padding on DIV elements so tables are often used instead.  Supports closing tag.
     </ul>
    
     <p>
@@ -191,6 +223,10 @@
 }</pre>
     <div class="example">Default <span class="code">wrapper</span> template</div>
 
+    <p>
+     <b>Please <a href="https://github.com/dimensia/mailjs/blob/master/mail.js">view the top of the <span class="code">mail.js</span> source file</a> for more information about the builtin templates and why
+     they exist.</b>
+    </p>
    <div>
     <h3>Example</h3>
 
