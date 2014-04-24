@@ -123,7 +123,7 @@ describe( 'generation', function() {
         btn: {
           html: '<a style="${style}color:#ffffff;width:$width;" href="$href">$label</a>',
           text: '$label: $href',
-          defaults: {
+          binds: {
             style: '',
             width: '300px'
           }
@@ -361,24 +361,44 @@ describe( 'generation', function() {
       'This is generated using Test.'
     );
   });
+
+  it( 'should render process function bindings', function() {
+    expect(
+      mailjs.render({
+        src: 'This is $dynamic.',
+        binds: {
+          dynamic: function() {
+            return '$name';
+          },
+          name: 'Test'
+        }
+      })
+    ).to.equal(
+      'This is Test.'
+    );
+  });
+
+
+  it( 'should work with Scope.if()', function() {
+    expect(
+      mailjs.render({
+        src: function( scope ) {
+          return '<a' + scope.if( 'style', ' style="$style"' ) + '>.';
+        },
+        binds: {
+          style: 'color:#000;'
+        }
+      })
+    ).to.equal(
+      '<a style="color:#000;">.'
+    );
+  });
+
 });
 
 describe( 'generation with boilerplate', function() {
   before( function() {
     mailjs.config({
-      binds: {
-        fontFamily: 'font-family:Helvetica, Arial, sans-serif'
-      },
-      templates: {
-        btn: {
-          html: '<a style="${style}color:#ffffff;width:$width;" href="$href">$label</a>',
-          text: '$label: $href',
-          defaults: {
-            style: '',
-            width: '300px'
-          }
-        }
-      }
     });
   });
 

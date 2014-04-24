@@ -4,17 +4,17 @@
  * Copyright 2014 Mark Bradley, Ted Halmrast
  * Available under MIT license <http://mailjs.org/license>
  */
-;(function(window) {
+;(function( window ) {
 
   /*
    * Start of Builtin Bindings and Templates
+   * =======================================
    */
 
   /*
-   * Most of these builtin templates are from various email boilerplate projects on the web ...
+   * Many of these builtin templates are borrowed from various email boilerplate projects on the web ...
    *
    * heavily from:  http://htmlemailboilerplate.com/
-   * 
    * also from:     http://www.emailology.org/#1
    */
 
@@ -63,33 +63,36 @@
       html: '-moz-border-radius:$borderRadius;-webkit-border-radius:$borderRadius;border-radius:$borderRadius'
     },
 
+    /*
+     * Borders, cellspacing, and cellpadding should be cleared out since outlook doesn't handle tables properly.
+     * http://www.emailonacid.com/blog/details/C13/removing_unwanted_spacing_or_gaps_between_tables_in_outlook_2007_2010
+     */
     table: {
       html:
         '<table border="0" cellpadding="0" cellspacing="0" style="$style">',
       htmlClose:
         '</table>',
-      defaults: {
+      binds: {
         style: ''
       }
     },
 
     /*
-     * Outlook doesn't support margins or padding on block-level elements, so we use tables instead of simple divs
+     * Outlook doesn't support margins or padding on block-level elements, so it is often better to use a [tdiv] instead of a <div>.
      */
     tdiv: {
       html: function( scope ) {
-
         return (
           '[table style="width:100%"]' +
            '<tr>' +
-            '<td style="$style">'
+            '<td' + scope.if( 'style', ' style="$style"' ) + '>'
         );
       },
       htmlClose:
           '</td>' +
          '</tr>' +
         '[/table]',
-      defaults: {
+      binds: {
         style: ''
       }
     },
@@ -99,7 +102,7 @@
       htmlClose: '</p>',
       textOpen: '\n',
       textClose: '',
-      defaults: {
+      binds: {
         style: ''
       }
     },
@@ -107,7 +110,7 @@
     imglink: {
       html: '<a href="$href" style="border:none;"><img style="height:$height;" src="$src"></a>',
       text: '$href',
-      defaults: {
+      binds: {
       }
     },
 
@@ -274,7 +277,17 @@ a:hover { color: green; }
 
   /*
    * End of Builtin Bindings and Templates
+   * =====================================
    */
+
+
+
+
+
+
+
+
+
 
 
 
@@ -290,6 +303,11 @@ a:hover { color: green; }
 
   Scope.prototype.binding = function( name ) {
     return mailjs.resolveBind( name, this.el, this.binds, this.template );
+  };
+
+  Scope.prototype.if = function( name, template ) {
+    var v = mailjs.resolveBind( name, this.el, this.binds, this.template );
+    return v != null ? template : '';
   };
 
 
@@ -314,7 +332,7 @@ a:hover { color: green; }
       var rslt =
         ( el && el.attrs[ name ] ) ||
         binds[ name ] ||
-        ( template && template.defaults && template.defaults[ name ] ) ||
+        ( template && template.binds && template.binds[ name ] ) ||
         ( this.opts.binds && this.opts.binds[ name ] ) ||
         builtinBinds[ name ];
 
@@ -325,7 +343,7 @@ a:hover { color: green; }
           // "string != null" means "string !== null && string !== undefined", intentional
           ( el && el.attrs[ name ] != null ) ||
           binds[ name ] != null ||
-          ( template && template.defaults && template.defaults[ name ] != null ) ||
+          ( template && template.binds && template.binds[ name ] != null ) ||
           ( this.opts.binds && this.opts.binds[ name ] != null ) ||
           builtinBinds[ name ] != null
         ) ? '' : null;
