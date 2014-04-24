@@ -7,15 +7,16 @@
 ;(function(window) {
 
   /*
+   * Start of Builtin Bindings and Templates
+   */
+
+  /*
    * Most of these builtin templates are from various email boilerplate projects on the web ...
    *
    * heavily from:  http://htmlemailboilerplate.com/
    * 
    * also from:     http://www.emailology.org/#1
    */
-
-  var whitespaceChar = /\s/,
-      attrNameChar   = /[^\t\n\f \/>"'=]/;
 
   var builtinBinds = {
     title: '',
@@ -29,12 +30,12 @@
 
     wrapper: {
       html:
-        '[html]\n' +
-         '[head/]\n' +
-         '<body>\n',
+        '[html]' +
+         '[head/]' +
+         '<body>',
 
       htmlClose:
-         '</body>\n' +
+         '</body>' +
         '</html>'
     },
 
@@ -48,13 +49,11 @@
 
     head: {
       html:
-        '<head>\n' +
-         '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
-         '<meta name="viewport" content="width=device-width, initial-scale=1.0"/>\n' +
-         '<title>$title</title>\n' +
-         '<style>\n' +
-          '$headStyle\n' +
-         '</style>\n',
+        '<head>' +
+         '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' +
+         '<meta name="viewport" content="width=device-width, initial-scale=1.0"/>' +
+         '<title>$title</title>' +
+         '<style>$headStyle</style>',
 
       htmlClose:
         '</head>'
@@ -78,10 +77,14 @@
      * Outlook doesn't support margins or padding on block-level elements, so we use tables instead of simple divs
      */
     tdiv: {
-      html:
-        '[table style="width:100%"]' +
-         '<tr>' +
-          '<td style="$style">',
+      html: function( scope ) {
+
+        return (
+          '[table style="width:100%"]' +
+           '<tr>' +
+            '<td style="$style">'
+        );
+      },
       htmlClose:
           '</td>' +
          '</tr>' +
@@ -269,6 +272,27 @@ a:hover { color: green; }
     }
   };
 
+  /*
+   * End of Builtin Bindings and Templates
+   */
+
+
+
+  var whitespaceChar = /\s/,
+      attrNameChar   = /[^\t\n\f \/>"'=]/;
+
+
+  function Scope( el, binds, template ) {
+    this.el = el;
+    this.binds = binds;
+    this.template = template;
+  }
+
+  Scope.prototype.binding = function( name ) {
+    return mailjs.resolveBind( name, this.el, this.binds, this.template );
+  };
+
+
   var mailjs = {
 
     opts: {},
@@ -401,6 +425,9 @@ a:hover { color: green; }
       }
 
       src = src || '';
+
+      if ( typeof src === 'function' )
+        src = src( new Scope( el, binds, template ) );
 
       if ( !opts.inside )
         src = '[wrapper]' + src + '[/wrapper]';

@@ -324,6 +324,43 @@ describe( 'generation', function() {
       'This is [].'
     );
   });
+
+  it( 'should render process function templates', function() {
+    expect(
+      mailjs.render({
+        src: 'This is [dynamic].',
+        templates: {
+          dynamic: {
+            src: function() {
+              return 'generated';
+            }
+          }
+        }
+      })
+    ).to.equal(
+      'This is generated.'
+    );
+  });
+
+  it( 'should properly process scope.binding() calls', function() {
+    expect(
+      mailjs.render({
+        src: 'This is [dynamic].',
+        templates: {
+          dynamic: {
+            src: function( scope ) {
+              return 'generated using ' + scope.binding( 'name' );
+            }
+          }
+        },
+        binds: {
+          name: 'Test'
+        }
+      })
+    ).to.equal(
+      'This is generated using Test.'
+    );
+  });
 });
 
 describe( 'generation with boilerplate', function() {
