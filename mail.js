@@ -18,12 +18,161 @@
    * also from:     http://www.emailology.org/#1
    */
 
+  /*
+   * Filters are not needed afaik ... ${ height | pixels } can be done as [pixels=$height]
+  var builtinFilters = {
+    pixels: function( pixels ) {
+      return parseInt( pixels, 10 );
+    }
+  };
+   */
+
   var builtinBinds = {
-    title: '',
+    title:     '',
     headStyle: ''
   };
 
   var builtinTemplates = {
+
+    /*
+     * Utility Templates
+     * =================
+     */
+
+    /*
+     * [pixels=300px] yields "300"
+     */
+    pixels: {
+      binds: {
+        pixels: ''
+      },
+      src: function( scope ) {
+        return '' + scope.pixels( scope.binding( 'pixels' ) );
+      }
+    },
+
+    borderRadius: {
+      html: '-moz-border-radius:$borderRadius;-webkit-border-radius:$borderRadius;border-radius:$borderRadius'
+    },
+
+
+    /*
+     * Component Templates
+     * ===================
+     */
+
+    /*
+     * Borders, cellspacing, and cellpadding should be cleared out since outlook doesn't handle tables properly.
+     * http://www.emailonacid.com/blog/details/C13/removing_unwanted_spacing_or_gaps_between_tables_in_outlook_2007_2010
+     */
+    table: {
+      html:
+        '<table border="0" cellpadding="0" cellspacing="0" style="$style">',
+      htmlClose:
+        '</table>',
+      binds: {
+        style: ''
+      }
+    },
+
+    /*
+     * Portable button that deals with padding correctly.  Also supports optional corner radius in Outlook.
+     *
+     * inspired by http://www.industrydive.com/blog/how-to-make-html-email-buttons-that-rock/#outlook
+     */
+    button: {
+      binds: {
+        href:            'http://example.com',
+        label:           'Example',
+        color:           '#ffffff',
+        backgroundColor: '#d62828',
+        fontSize:        '16px',
+        height:          '40px',
+        width:           '300px',
+        borderRadius:    '',        // set to '6px' for example
+      },
+      html: function( scope ) {
+        var borderRadius = scope.binding( 'borderRadius' );
+
+        if ( borderRadius ) {
+          return (
+            '<div>' +
+             '<!--\\[if mso\\]>' +
+              '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="$href" style="height:$height;v-text-anchor:middle;width:$width;" arcsize="10%" stroke="f" fillcolor="$backgroundColor">' +
+               '<w:anchorlock/>' +
+               '<center style="color:$color;font-family:sans-serif;font-size:$fontSize;font-weight:bold;">$label</center>' +
+              '</v:roundrect>' +
+             '<!\\[endif\\]-->' +
+             '<!\\[if !mso\\]>' +
+              '[table]' +
+               '<tr>' +
+                '<td align="center" width="[pixels=$width]" height="[pixels=$height]" bgcolor="$backgroundColor" style="[borderRadius=$borderRadius];color:$color;display:block;">' +
+                 '<a href="$href" style="color:$color;font-size:$fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:$height;width:100%;display:inline-block">$label</a>' +
+                '</td>' +
+               '</tr>' +
+              '[/table]' +
+             '<!\\[endif\\]>' +
+            '</div>'
+          );
+        } else {
+          return (
+            '[table]' +
+             '<tr>' +
+              '<td align="center" width="[pixels=$width]" height="[pixels=$height]" bgcolor="$backgroundColor" style="color:$color;display:block;">' +
+               '<a href="$href" style="color:#ffffff;font-size:$fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:$height;width:100%;display:inline-block">$label</a>' +
+              '</td>' +
+             '</tr>' +
+            '[/table]'
+          );
+        }
+      },
+      text:
+        '$label: $href'
+    },
+
+    /*
+     * Outlook doesn't support margins or padding on block-level elements, so it is often better to use a [tdiv] instead of a <div>.
+     */
+    tdiv: {
+      binds: {
+        style: ''
+      },
+      html: function( scope ) {
+        return (
+          '[table style="width:100%"]' +
+           '<tr>' +
+            '<td' + scope.if( 'style', ' style="$style"' ) + '>'
+        );
+      },
+      htmlClose:
+          '</td>' +
+         '</tr>' +
+        '[/table]'
+    },
+
+    p: {
+      binds: {
+        style: ''
+      },
+      htmlOpen: '<br><br><p style="margin:0;$style">',
+      htmlClose: '</p>',
+      textOpen: '\n',
+      textClose: ''
+    },
+
+    imglink: {
+      binds: {
+      },
+      html: '<a href="$href" style="border:none;"><img style="height:$height;" src="$src"></a>',
+      text: '$href'
+    },
+
+
+    /*
+     * Boilerplate Templates
+     * =====================
+     */
+
     doctype: {
       src: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
     },
@@ -58,62 +207,6 @@
       htmlClose:
         '</head>'
     },
-
-    borderRadius: {
-      html: '-moz-border-radius:$borderRadius;-webkit-border-radius:$borderRadius;border-radius:$borderRadius'
-    },
-
-    /*
-     * Borders, cellspacing, and cellpadding should be cleared out since outlook doesn't handle tables properly.
-     * http://www.emailonacid.com/blog/details/C13/removing_unwanted_spacing_or_gaps_between_tables_in_outlook_2007_2010
-     */
-    table: {
-      html:
-        '<table border="0" cellpadding="0" cellspacing="0" style="$style">',
-      htmlClose:
-        '</table>',
-      binds: {
-        style: ''
-      }
-    },
-
-    /*
-     * Outlook doesn't support margins or padding on block-level elements, so it is often better to use a [tdiv] instead of a <div>.
-     */
-    tdiv: {
-      html: function( scope ) {
-        return (
-          '[table style="width:100%"]' +
-           '<tr>' +
-            '<td' + scope.if( 'style', ' style="$style"' ) + '>'
-        );
-      },
-      htmlClose:
-          '</td>' +
-         '</tr>' +
-        '[/table]',
-      binds: {
-        style: ''
-      }
-    },
-
-    p: {
-      htmlOpen: '<br><br><p style="margin:0;$style">',
-      htmlClose: '</p>',
-      textOpen: '\n',
-      textClose: '',
-      binds: {
-        style: ''
-      }
-    },
-
-    imglink: {
-      html: '<a href="$href" style="border:none;"><img style="height:$height;" src="$src"></a>',
-      text: '$href',
-      binds: {
-      }
-    },
-
     headStyles: {
       html: 
 
@@ -290,10 +383,19 @@ a:hover { color: green; }
 
 
 
+  /*
+   * mail.js
+   * =======
+   */
 
   var whitespaceChar = /\s/,
       attrNameChar   = /[^\t\n\f \/>"'=]/;
 
+
+  /*
+   * Scope
+   * -----
+   */
 
   function Scope( el, binds, template ) {
     this.el = el;
@@ -310,6 +412,10 @@ a:hover { color: green; }
     return v != null ? template : '';
   };
 
+  // undocumented, not sure if this is a good idea
+  Scope.prototype.pixels = function( pixels ) {
+    return parseInt( pixels, 10 );
+  };
 
   var mailjs = {
 
@@ -349,13 +455,28 @@ a:hover { color: green; }
         ) ? '' : null;
     },
 
+    /*
+    resolveFilter: function( name, filters, template ) {
+      var rslt =
+        filters[ name ] ||
+        ( template && template.filters && template.filters[ name ] ) ||
+        ( this.opts.filters && this.opts.filters[ name ] ) ||
+        builtinFilters[ name ];
+
+      return rslt;
+    },
+    */
+
     parseAttrs: function( s ) {
       var attrs = {};
 
       s.replace(
-        /([^\s=,]+)\s*=\s*(?:'([^']+)'|"([^"]+)"|(\S+))/g,
+        /([^\s=,]+)\s*=\s*(?:'([^']*)'|"([^"]*)"|(\S+))/g,
         function( m, m1, m2, m3, m4 /*, offset, str */ ) {
-          attrs[ m1 ] = m2 || m3 || m4;
+          var v = m2 || m3 || m4;
+
+          // three level priority ... !!v > '' > undefined
+          attrs[ m1 ] = !v && ( m2 != null || m3 != null || m4 != null ) ? '' : v;
         }
       );
 
@@ -365,7 +486,7 @@ a:hover { color: green; }
     parseElement: function( s ) {
       var matches = s.match(
         // note:  this not only grabs the tag but also verifies that the entire element can be parsed, including the attributes
-        /^\[(\/?)([^\s\]/]+)+(?:\s*(?:[^\s=,]+)\s*=\s*(?:'(?:[^']+)'|"(?:[^"]+)"|(?:[^'"\[\]\s]+)))*(\/?)\]/
+        /^\[(\/?)([^\s\]/]+)+(?:\s*(?:[^\s\]=,]+)\s*=\s*(?:'(?:[^']*)'|"(?:[^"]*)"|(?:[^'"\[\]\s]+)))*(\/?)\]/
       );
 
       if ( !matches )
@@ -422,12 +543,12 @@ a:hover { color: green; }
           el        = opts.el,
           template  = opts.template,
 
-          src,
+          src       = opts.src,
           dest      = '',
 
           close     = opts.close || ( el && el.close );
 
-      if ( template ) {
+      if ( src == null && template ) {
         if ( html )
           src = close ? template.htmlClose : template.html;
         else
@@ -438,8 +559,6 @@ a:hover { color: green; }
 
         if ( close && src == null && !template.htmlClose && !template.textClose )
           throw new Error( 'Closing elements not supported for template: ' + ( el ? el.el : '' ) );
-      } else {
-        src = opts.src;
       }
 
       src = src || '';
@@ -469,6 +588,22 @@ a:hover { color: green; }
 
           if ( cTemplate ) {
 
+            // evaluate/render attributes before invoking the template
+            var attrs = cEl.attrs;
+            for ( var key in attrs ) {
+              if ( attrs.hasOwnProperty( key ) ) {
+                attrs[ key ] = mailjs.render({
+                  el:        el,
+                  template:  template,
+                  src:       attrs[ key ],
+                  binds:     binds,
+                  html:      html,
+                  templates: templates,
+                  inside:    true
+                });
+              }
+            }
+
             dest += mailjs.render({
               template:  cTemplate,
               el:        cEl,
@@ -489,7 +624,8 @@ a:hover { color: green; }
         case '$':
           si++;
 
-          var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{([a-zA-Z0-9_]+)\}/ );
+          //var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*(\|\s*[a-zA-Z0-9_|\s]+)?\}/ );
+          var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*\}/ );
 
           if ( !matches || matches.length < 3 )
             throw new Error( "Missing variable name after $." );
@@ -499,7 +635,7 @@ a:hover { color: green; }
 
           var bind = this.resolveBind( name, el, binds, template );
           if ( bind == null )
-            throw new Error( 'No bind definition for: ' + name );
+            throw new Error( 'No bind definition for $' + name + ' when processing' + ( el ? ' template ' + el.tag : '' ) + ' (mode=' + ( html ? 'HTML' : 'text' ) + '):\n\n' + src );
 
           bind = mailjs.render({
             src:       bind,

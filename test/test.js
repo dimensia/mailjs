@@ -108,9 +108,30 @@ describe( 'element parser', function() {
       mailjs.parseElement( '[email="support@apple.com"]' )
     ).to.eql(
       { el: '[email="support@apple.com"]', tag: 'email', attrs: { email: 'support@apple.com' } }
+    );
+
+    expect(
+      mailjs.parseElement( '[pixels=300px]' )
+    ).to.eql(
+      { el: '[pixels=300px]', tag: 'pixels', attrs: { pixels: '300px' } }
+    );
+  });
+
+  it( 'should parse empty attributes', function() {
+    expect(
+      mailjs.parseElement( '[button borderRadius=""]' )
+    ).to.eql(
+      { el: '[button borderRadius=""]', tag: 'button', attrs: { borderRadius: '' } }
     )
   });
 
+  it( 'should parse only the first element', function() {
+    expect(
+      mailjs.parseElement( '[wrapper][pixels=300px]' )
+    ).to.eql(
+      { el: '[wrapper]', tag: 'wrapper', attrs: {} }
+    )
+  });
 });
 
 describe( 'generation', function() {
@@ -176,7 +197,7 @@ describe( 'generation', function() {
   it( 'should process simple binds using ES6-style template syntax - ${}', function() {
     expect(
       mailjs.render({
-        src: 'Hello, ${firstName}${space}$lastName.',
+        src: 'Hello, ${firstName}${ space }$lastName.',
         binds: {
           firstName: 'Jane',
           lastName:  'Anderson',
@@ -378,7 +399,6 @@ describe( 'generation', function() {
     );
   });
 
-
   it( 'should work with Scope.if()', function() {
     expect(
       mailjs.render({
@@ -394,6 +414,58 @@ describe( 'generation', function() {
     );
   });
 
+  it( 'should handle redefining nested binds', function() {
+    expect(
+      mailjs.render({
+        src: function( scope ) {
+          return '[b width="300px;"]'
+        },
+        templates: {
+          a: {
+            src: '$width'
+          },
+          b: {
+            src: '[a width=$width]'
+          }
+        }
+      })
+    ).to.equal(
+      '300px;'
+    );
+  });
+
+  it( 'should handle default attributes', function() {
+    expect(
+      mailjs.render({
+        src: function( scope ) {
+          return '[b]'
+        },
+        templates: {
+          a: {
+            src: '$width',
+          },
+          b: {
+            src: '[a width=$width]',
+            binds: {
+              width: '40px'
+            }
+          }
+        }
+      })
+    ).to.equal(
+      '40px'
+    );
+  });
+
+  it( 'should support Scope.pixels()', function() {
+    expect(
+      mailjs.render({
+        src: '[pixels=300px]'
+      })
+    ).to.equal(
+      '300'
+    );
+  });
 });
 
 describe( 'generation with boilerplate', function() {
