@@ -663,6 +663,22 @@ a:hover { color: green; }
       }
 
       return dest;
+    },
+
+    send: function( opts ) {
+
+      if ( !this.opts.transport )
+        throw new Error( "Nodemailer transport not configured." );
+
+      var body = opts.body;
+
+      body.html = true;
+      opts.html = mailjs.render( body );
+
+      delete body.html;
+      opts.text = mailjs.render( body );
+
+      this.opts.transport.sendMail( opts );
     }
   };
 
