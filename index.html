@@ -29,7 +29,8 @@
     </p>
     <p>
      Note that Mail.js is <i>not</i> a mail transport -- Mail.js works <i>with</i> mail transport packages like
-     <a href="http://www.nodemailer.com/">Nodemailer</a>.
+     <a href="http://www.nodemailer.com/">Nodemailer</a>.  (<a href="#nodemailer">Nodemailer integration</a> is also
+     built into Mail.js.)
     </p>
    </div>
 
@@ -73,12 +74,13 @@
    <div>
     <h3>API</h3>
 
-    <h4>Methods</h4>
+    <h4 id="config">Methods</h4>
 
     <p><span class="code">mailjs.config()</span> configures Mail.js options:</p>
     <pre><code>mailjs.config({
   <b>binds</b>: <span class="desc">An object containing common bind definitions.</span>
   <b>templates</b>: <span class="desc">An object containing common template definitions.</span>
+  <b>transport</b>: <span class="desc">Nodemailer transport for <a href="#nodemailer">Nodemailer integration</a>.</span>
 });
 </code></pre>
 
@@ -228,6 +230,38 @@ binds: {
      <b>Please <a href="https://github.com/dimensia/mailjs/blob/master/mail.js">view the top of the <span class="code">mail.js</span> source file</a> for more information about the builtin templates and why
      they exist.</b>
     </p>
+
+    <h4 id="nodemailer">Nodemailer Integeration</h4>
+
+    <p>
+     Mail.js has built-in integration with <a id="nodemailer" href="http://nodemailer.com">Nodemailer</a>.</h4>  If a <span class="code">transport</span> option is passed into the
+     <a href="#config"><span class="code">mailjs.config()</span></a> that is a Nodemailer transport,
+    </p>
+
+    <pre class="code">mailjs.config({
+  <i>... mailjs.config() options ...</i>,
+  <b>transport</b>: nodemailer.createTransport( 'SES', {
+    AWSAccessKeyID: '<i>aws access key</i>',
+    AWSSecretKey:   '<i>aws secret key</i>'
+  })
+});</pre>
+    <div class="example">Mail.js <span class="code">config()</span> Example with a Nodemailer Amazon SES Transport</div>
+
+    <p>
+     a <span class="code">mailjs.send()</span> method is available:
+    </p>
+
+    <pre class="code">mailjs.send({
+  <i>... <a href="http://www.nodemailer.com/docs/messages">Nodemailer message options</a> ...</i>,
+  <b>body</b>: { <span class="desc"><i>// <b>body</b> replaces the Nodemailer <b>text</b> and <b>html</b> options</i></span>
+    <b>src</b>: <span class="desc">A string or <a href="#functionTemplates">function</a> containing the template to render.</span>
+    <b>binds</b>: <span class="desc">An object containing bind definitions that will be available while processing this render.</span>
+    <b>templates</b>: <span class="desc">An object containing template definitions that will be available while processing this render.</span>
+  }
+});</pre>
+    <div class="example">Mail.js <span class="code">send()</span> API</div>
+
+   </div>
    <div>
     <h3>Example</h3>
 
