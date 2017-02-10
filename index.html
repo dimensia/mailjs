@@ -63,7 +63,7 @@
     </p>
     
     <p>
-     Mail.js is intended to be run inside Node.js but nothing prohibits it being used in a web browser.  Mail.js has no dependencies.
+     Mail.js is intended to be run inside Node.js but nothing prohibits it being used in a web browser.
     </p>
 
     <p>
@@ -90,6 +90,7 @@
   <b>binds</b>: <span class="desc">An object containing bind definitions that will be available while processing this render.</span>
   <b>templates</b>: <span class="desc">An object containing template definitions that will be available while processing this render.</span>
   <b>html</b>: <span class="desc">A boolean indicating whether HTML (true) or text (false) should be rendered.</span>
+  <b>css</b>: <span class="desc">A string containing any CSS that should be processed in the template.  This CSS will be inlined.</span>
 });
 </code></pre>
 
@@ -288,7 +289,7 @@ binds: {
         'Copyright 2014'
     },
     email: {
-      html: '&lt;a href="mailto:$email"&gt;$email</a>',
+      html: '&lt;a class="email" href="mailto:$email"&gt;$email</a>',
       text: '$email'
     }
   }
@@ -302,7 +303,8 @@ binds: {
   binds: {
     title: '$company -- Order Complete'
   },
-  html: true
+  html: true,
+  css: '.email { color: blue; }`
 }</pre>
     <div class="example">Mail.js <span class="code"><b>render</b></span> example</div>
 
