@@ -1,3 +1,7 @@
+
+var juice = require('juice');
+
+
 /**
  * @license
  * mail.js
@@ -539,6 +543,7 @@ a:hover { color: green; }
       var binds     = opts.binds || {},
           templates = opts.templates || {},
           html      = opts.html,
+          css       = opts.css,
 
           el        = opts.el,
           template  = opts.template,
@@ -661,6 +666,9 @@ a:hover { color: green; }
         delete opts.close;
         opts.inside = savedInside;
       }
+
+      if (opts.html && opts.css)
+        dest = juice(dest, { extraCss: css });
 
       return dest;
     },

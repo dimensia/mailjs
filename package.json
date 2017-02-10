@@ -3,7 +3,9 @@
   "version": "0.1.6",
   "description": "JavaScript HTML and text email renderer/formatter.",
   "main": "mail.js",
-  "dependencies": {},
+  "dependencies": {
+    "juice": "^4.0.2"
+  },
   "devDependencies": {
     "chai": "^1.9.1",
     "mocha": "^1.18.2"

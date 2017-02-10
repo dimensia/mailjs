@@ -466,6 +466,18 @@ describe( 'generation', function() {
       '300'
     );
   });
+
+  it( 'should support css inlining', function() {
+    expect(
+      mailjs.render({
+        src: '<h1 class="foo">test</h1>',
+        html: true,
+        css: '.foo { color: red; }'
+      })
+    ).to.equal(
+      '<h1 class="foo" style="color: red;">test</h1>'
+    );
+  });
 });
 
 describe( 'generation with boilerplate', function() {
