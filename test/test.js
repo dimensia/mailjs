@@ -414,6 +414,20 @@ describe( 'generation', function() {
     );
   });
 
+  it( 'should support != syntax', function() {
+    expect(
+      mailjs.render({
+        src: '<a !=href !=style>',
+        binds: {
+          style: 'color:#000;',
+          href: ''
+        }
+      })
+    ).to.equal(
+      '<a  style="color:#000;">'
+    );
+  });
+
   it( 'should handle redefining nested binds', function() {
     expect(
       mailjs.render({

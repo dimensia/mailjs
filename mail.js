@@ -628,6 +628,12 @@ a:hover { color: green; }
         case '!':
           si++;
 
+          var assign = false;
+          if (src.substring(si, si+1) === '=') {
+            assign = true;
+            si++;
+          }
+
           //var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*(\|\s*[a-zA-Z0-9_|\s]+)?\}/ );
           var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*\}/ );
 
@@ -641,8 +647,18 @@ a:hover { color: green; }
           if ( bind == null )
             throw new Error( 'No bind definition for !' + name + ' when processing' + ( el ? ' template ' + el.tag : '' ) + ' (mode=' + ( html ? 'HTML' : 'text' ) + '):\n\n' + src );
 
+          var nestedSrc;
+          if ( assign ) {
+            if ( !bind )
+              break;
+
+            nestedSrc = name + '="' + bind + '"';
+          } else {
+            nestedSrc = bind;
+          }
+
           bind = mailjs.render({
-            src:       bind,
+            src:       nestedSrc,
             binds:     binds,
             html:      html,
             templates: templates,
