@@ -23,7 +23,7 @@ var juice = require('juice');
    */
 
   /*
-   * Filters are not needed afaik ... ${ height | pixels } can be done as [pixels=$height]
+   * Filters are not needed afaik ... !{ height | pixels } can be done as [pixels=!height]
   var builtinFilters = {
     pixels: function( pixels ) {
       return parseInt( pixels, 10 );
@@ -56,7 +56,7 @@ var juice = require('juice');
     },
 
     borderRadius: {
-      html: '-moz-border-radius:$borderRadius;-webkit-border-radius:$borderRadius;border-radius:$borderRadius'
+      html: '-moz-border-radius:!borderRadius;-webkit-border-radius:!borderRadius;border-radius:!borderRadius'
     },
 
 
@@ -71,7 +71,7 @@ var juice = require('juice');
      */
     table: {
       html:
-        '<table border="0" cellpadding="0" cellspacing="0" style="$style">',
+        '<table border="0" cellpadding="0" cellspacing="0" style="!style">',
       htmlClose:
         '</table>',
       binds: {
@@ -102,16 +102,16 @@ var juice = require('juice');
           return (
             '<div>' +
              '<!--\\[if mso\\]>' +
-              '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="$href" style="height:$height;v-text-anchor:middle;width:$width;" arcsize="10%" stroke="f" fillcolor="$backgroundColor">' +
+              '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="!href" style="height:!height;v-text-anchor:middle;width:!width;" arcsize="10%" stroke="f" fillcolor="!backgroundColor">' +
                '<w:anchorlock/>' +
-               '<center style="color:$color;font-family:sans-serif;font-size:$fontSize;font-weight:bold;">$label</center>' +
+               '<center style="color:!color;font-family:sans-serif;font-size:!fontSize;font-weight:bold;">!label</center>' +
               '</v:roundrect>' +
              '<!\\[endif\\]-->' +
              '<!\\[if !mso\\]>' +
               '[table]' +
                '<tr>' +
-                '<td align="center" width="[pixels=$width]" height="[pixels=$height]" bgcolor="$backgroundColor" style="[borderRadius=$borderRadius];color:$color;display:block;">' +
-                 '<a href="$href" style="color:$color;font-size:$fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:$height;width:100%;display:inline-block">$label</a>' +
+                '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="[borderRadius=!borderRadius];color:!color;display:block;">' +
+                 '<a href="!href" style="color:!color;font-size:!fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
                 '</td>' +
                '</tr>' +
               '[/table]' +
@@ -122,8 +122,8 @@ var juice = require('juice');
           return (
             '[table]' +
              '<tr>' +
-              '<td align="center" width="[pixels=$width]" height="[pixels=$height]" bgcolor="$backgroundColor" style="color:$color;display:block;">' +
-               '<a href="$href" style="color:#ffffff;font-size:$fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:$height;width:100%;display:inline-block">$label</a>' +
+              '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="color:!color;display:block;">' +
+               '<a href="!href" style="color:#ffffff;font-size:!fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
               '</td>' +
              '</tr>' +
             '[/table]'
@@ -131,7 +131,7 @@ var juice = require('juice');
         }
       },
       text:
-        '$label: $href'
+        '!label: !href'
     },
 
     /*
@@ -145,7 +145,7 @@ var juice = require('juice');
         return (
           '[table style="width:100%"]' +
            '<tr>' +
-            '<td' + scope.if( 'style', ' style="$style"' ) + '>'
+            '<td' + scope.if( 'style', ' style="!style"' ) + '>'
         );
       },
       htmlClose:
@@ -158,7 +158,7 @@ var juice = require('juice');
       binds: {
         style: ''
       },
-      htmlOpen: '<br><br><p style="margin:0;$style">',
+      htmlOpen: '<br><br><p style="margin:0;!style">',
       htmlClose: '</p>',
       textOpen: '\n',
       textClose: ''
@@ -167,8 +167,8 @@ var juice = require('juice');
     imglink: {
       binds: {
       },
-      html: '<a href="$href" style="border:none;"><img style="height:$height;" src="$src"></a>',
-      text: '$href'
+      html: '<a href="!href" style="border:none;"><img style="height:!height;" src="!src"></a>',
+      text: '!href'
     },
 
 
@@ -205,8 +205,8 @@ var juice = require('juice');
         '<head>' +
          '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' +
          '<meta name="viewport" content="width=device-width, initial-scale=1.0"/>' +
-         '<title>$title</title>' +
-         '<style>$headStyle</style>',
+         '<title>!title</title>' +
+         '<style>!headStyle</style>',
 
       htmlClose:
         '</head>'
@@ -362,7 +362,7 @@ a:hover { color: green; }
   // Put CSS for high density (hdpi) Android layouts in here
 //}
 
-  '$styleBlock' +
+  '!styleBlock' +
 
 '</style>\n'
     },
@@ -626,21 +626,21 @@ a:hover { color: green; }
 
           break;
 
-        case '$':
+        case '!':
           si++;
 
           //var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*(\|\s*[a-zA-Z0-9_|\s]+)?\}/ );
           var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*\}/ );
 
           if ( !matches || matches.length < 3 )
-            throw new Error( "Missing variable name after $." );
+            throw new Error( "Missing variable name after !." );
 
           var name = matches[ 1 ] || matches[ 2 ];
           si += matches[ 0 ].length;
 
           var bind = this.resolveBind( name, el, binds, template );
           if ( bind == null )
-            throw new Error( 'No bind definition for $' + name + ' when processing' + ( el ? ' template ' + el.tag : '' ) + ' (mode=' + ( html ? 'HTML' : 'text' ) + '):\n\n' + src );
+            throw new Error( 'No bind definition for !' + name + ' when processing' + ( el ? ' template ' + el.tag : '' ) + ' (mode=' + ( html ? 'HTML' : 'text' ) + '):\n\n' + src );
 
           bind = mailjs.render({
             src:       bind,

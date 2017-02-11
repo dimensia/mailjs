@@ -142,8 +142,8 @@ describe( 'generation', function() {
       },
       templates: {
         btn: {
-          html: '<a style="${style}color:#ffffff;width:$width;" href="$href">$label</a>',
-          text: '$label: $href',
+          html: '<a style="!{style}color:#ffffff;width:!width;" href="!href">!label</a>',
+          text: '!label: !href',
           binds: {
             style: '',
             width: '300px'
@@ -174,17 +174,17 @@ describe( 'generation', function() {
   it( 'should support escapes', function() {
     expect(
       mailjs.render({
-        src: '\\[Hello, \\$firstName./\\]'
+        src: '\\[Hello, \\!firstName./\\]'
       })
     ).to.eql(
-      '[Hello, $firstName./]'
+      '[Hello, !firstName./]'
     );
   });
 
   it( 'should process simple binds', function() {
     expect(
       mailjs.render({
-        src: 'Hello, $firstName.',
+        src: 'Hello, !firstName.',
         binds: {
           firstName: 'Jane'
         }
@@ -194,10 +194,10 @@ describe( 'generation', function() {
     );
   });
 
-  it( 'should process simple binds using ES6-style template syntax - ${}', function() {
+  it( 'should process simple binds using ES6-style template syntax - !{}', function() {
     expect(
       mailjs.render({
-        src: 'Hello, ${firstName}${ space }$lastName.',
+        src: 'Hello, !{firstName}!{ space }!lastName.',
         binds: {
           firstName: 'Jane',
           lastName:  'Anderson',
@@ -218,7 +218,7 @@ describe( 'generation', function() {
         },
         templates: {
           msg: {
-            src: 'a message for $name'
+            src: 'a message for !name'
           }
         }
       })
@@ -233,8 +233,8 @@ describe( 'generation', function() {
         src: 'Email us at [email="support@apple.com"].',
         templates: {
           email: {
-            html: '<a href="mailto:$email">$email</a>',
-            text: '$email'
+            html: '<a href="mailto:!email">!email</a>',
+            text: '!email'
           }
         },
         html: true
@@ -275,7 +275,7 @@ describe( 'generation', function() {
   it( 'should process config()ured binds', function() {
     expect(
       mailjs.render({
-        src: '[btn style="$fontFamily;" href="https://apple.com" label="Visit Apple"].',
+        src: '[btn style="!fontFamily;" href="https://apple.com" label="Visit Apple"].',
         html: true
       })
     ).to.equal(
@@ -286,7 +286,7 @@ describe( 'generation', function() {
   it( 'should allow bindings to contain template references', function() {
     expect(
       mailjs.render({
-        src: 'This is $myBtn.',
+        src: 'This is !myBtn.',
         html: true,
         binds: {
           myBtn: '[btn href="https://apple.com" label="Visit Apple"]'
@@ -300,11 +300,11 @@ describe( 'generation', function() {
   it( 'should allow bindings to contain references to other bindings', function() {
     expect(
       mailjs.render({
-        src: 'It is true that $statement.',
+        src: 'It is true that !statement.',
         binds: {
-          statement:  '$name is a $profession',
+          statement:  '!name is a !profession',
           profession: 'programmer',
-          name:       '$firstName $lastName',
+          name:       '!firstName !lastName',
           firstName:  'Jill',
           lastName:   'Anderson'
         }
@@ -386,10 +386,10 @@ describe( 'generation', function() {
   it( 'should render process function bindings', function() {
     expect(
       mailjs.render({
-        src: 'This is $dynamic.',
+        src: 'This is !dynamic.',
         binds: {
           dynamic: function() {
-            return '$name';
+            return '!name';
           },
           name: 'Test'
         }
@@ -403,7 +403,7 @@ describe( 'generation', function() {
     expect(
       mailjs.render({
         src: function( scope ) {
-          return '<a' + scope.if( 'style', ' style="$style"' ) + '>.';
+          return '<a' + scope.if( 'style', ' style="!style"' ) + '>.';
         },
         binds: {
           style: 'color:#000;'
@@ -422,10 +422,10 @@ describe( 'generation', function() {
         },
         templates: {
           a: {
-            src: '$width'
+            src: '!width'
           },
           b: {
-            src: '[a width=$width]'
+            src: '[a width=!width]'
           }
         }
       })
@@ -442,10 +442,10 @@ describe( 'generation', function() {
         },
         templates: {
           a: {
-            src: '$width',
+            src: '!width',
           },
           b: {
-            src: '[a width=$width]',
+            src: '[a width=!width]',
             binds: {
               width: '40px'
             }
