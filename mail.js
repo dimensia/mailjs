@@ -543,7 +543,6 @@ a:hover { color: green; }
       var binds     = opts.binds || {},
           templates = opts.templates || {},
           html      = opts.html,
-          css       = opts.css,
 
           el        = opts.el,
           template  = opts.template,
@@ -667,8 +666,13 @@ a:hover { color: green; }
         opts.inside = savedInside;
       }
 
-      if (opts.html && opts.css)
-        dest = juice(dest, { extraCss: css });
+      if (opts.html) {
+        var css = (mailjs.opts.css || '') + (opts.css || '');
+
+        if (css) {
+          dest = juice(dest, { extraCss: css });
+        }
+      }
 
       return dest;
     },
