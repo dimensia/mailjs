@@ -113,9 +113,9 @@
 
     <p>
      Binds are simple text variables that are essentially lightweight templates.  Their syntax for usage is similar to string interpolation in
-     EcmaScript 6.
+     EcmaScript 6 except that an exclamation point (!) is used instead of a dollar sign ($).
     </p>
-    <pre class="code">src: 'Hello $firstName ${lastName},',
+    <pre class="code">src: 'Hello !firstName !{lastName},',
 binds: {
   firstName: 'Jane',
   lastName: 'Doe'
@@ -149,17 +149,17 @@ binds: {
     <p>
      Templates syntax is similar to HTML's use of angular brackets, but with square brackets instead:
     </p>
-    <pre class="code">src: '[a href="$companyUrl"]our url[/a]'</pre>
+    <pre class="code">src: '[a href="!companyUrl"]our url[/a]'</pre>
     <div class="example">Template Usage Example</div>
 
     <p>
      A shortcut to assign a parameter with the same name as the template exists.  The following two are equivalent:
     </p>
-    <pre class="code">src: '[email email="$companyUrl" label="a label"]'</pre>
+    <pre class="code">src: '[email email="!companyUrl" label="a label"]'</pre>
 
     <p>The following is a shortcut of the preceding:</p>
 
-    <pre class="code">src: '[email="$companyUrl" label="a label"]'</pre>
+    <pre class="code">src: '[email="!companyUrl" label="a label"]'</pre>
 
     <p>
      If none of the <span class="code">*Close</span> options are supplied, the template cannot be used with either self-closing tag (i.e. <span class="code">[a <i>...</i> /]</span>)
@@ -168,8 +168,8 @@ binds: {
 
     <h4>Escape Character</h4>
 
-    <p>If you need to use the <span class="code">$</span>, <span class="code">[</span>, or <span class="code">\</span> characters, escape them using the backslash <span class="code">\</span> character.
-    <pre class="code">$firstName owes $vendor \$50.00</pre>
+    <p>If you need to use the <span class="code">!</span>, <span class="code">[</span>, or <span class="code">\</span> characters, escape them using the backslash <span class="code">\</span> character.
+    <pre class="code">!firstName owes !vendor $50.00\!</pre>
     <div class="example">Escape Character Example</div>
 
     <h4 id="functionTemplates">Template &amp; Binding Functions</h4>
@@ -201,8 +201,8 @@ binds: {
 
     <p>The following builtin bindings are available to override:</p>
     <ul>
-     <li><span class="code"><b>$title</b></span> - Used as a title of the email.  Optional.
-     <li><span class="code"><b>$headBlock</b></span> - Extra styles to be placed in the head style block.
+     <li><span class="code"><b>!title</b></span> - Used as a title of the email.  Optional.
+     <li><span class="code"><b>!headBlock</b></span> - Extra styles to be placed in the head style block.
     </ul>
 
     <p>The following templates are available, they incorporate a lot of <a href="#emailBoilerplate">email boilerplate</a> to increase portability of rendering:<p>
@@ -290,8 +290,8 @@ binds: {
         'Copyright 2014'
     },
     email: {
-      html: '&lt;a class="email" href="mailto:$email"&gt;$email</a>',
-      text: '$email'
+      html: '&lt;a class="email" href="mailto:!email"&gt;!email</a>',
+      text: '!email'
     }
   }
 });</pre>
@@ -300,9 +300,9 @@ binds: {
     <p>A simple <span class="code">render</span> example:</p>
 
 <pre class="code">mailjs.render({
-  src: 'Thank you for your order.  Contact us at [email=$companyEmail] if you have any problems.',
+  src: 'Thank you for your order.  Contact us at [email=!companyEmail] if you have any problems.',
   binds: {
-    title: '$company -- Order Complete'
+    title: '!company -- Order Complete'
   },
   html: true,
   css: '.email { color: blue; }`
