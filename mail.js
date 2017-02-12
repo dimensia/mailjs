@@ -666,7 +666,7 @@ a:hover { color: green; }
           var nestedSrc;
           if ( assignmentBind ) {
             if ( !bind ) {
-              const dlast = dest.length - 1;
+              var dlast = dest.length - 1;
 
               if ( dlast >= 0 && dest.substring( dlast ) === ' ' ) {
                 dest = dest.substring( 0, dlast );
