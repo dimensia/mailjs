@@ -526,6 +526,18 @@ describe( 'generation', function() {
       '<h1 class="foo" style="color: red;">test</h1>'
     );
   });
+
+  it( 'should process tdiv\'s', function() {
+    expect(
+      mailjs.render({
+        src: '[tdiv class="foo"]',
+        html: true
+      })
+    ).to.eql(
+      '<table border="0" cellpadding="0" cellspacing="0" class="foo" style="width:100%;"><tr><td>'
+    );
+  });
+
 });
 
 describe( 'generation with boilerplate', function() {

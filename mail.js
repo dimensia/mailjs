@@ -72,10 +72,11 @@ var _ = require('lodash'),
      */
     table: {
       html:
-        '<table border="0" cellpadding="0" cellspacing="0" !style>',
+        '<table border="0" cellpadding="0" cellspacing="0" !=class !=style>',
       htmlClose:
         '</table>',
       binds: {
+        class: '',
         style: ''
       }
     },
@@ -143,13 +144,9 @@ var _ = require('lodash'),
         class: '',
         style: ''
       },
-      html: function( scope ) {
-        return (
-          '[table !=class style="width:100%"]' +
-           '<tr>' +
-            '<td' + scope.if( 'style', ' style="!style"' ) + '>'
-        );
-      },
+      html: '[table class="!class" style="width:100%;"]' +
+             '<tr>' +
+              '<td !=style>',
       htmlClose:
           '</td>' +
          '</tr>' +
