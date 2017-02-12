@@ -711,11 +711,11 @@ a:hover { color: green; }
         opts.inside = savedInside;
       }
 
-      if (opts.html) {
+      if ( !opts.inside && opts.html ) {
         var css = (mailjs.opts.css || '') + (opts.css || '');
 
         if (css) {
-          dest = juice(dest, { extraCss: css });
+          dest = juice( dest, { extraCss: css } );
         }
       }
 
