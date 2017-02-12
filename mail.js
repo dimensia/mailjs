@@ -72,10 +72,11 @@ var _ = require('lodash'),
      */
     table: {
       html:
-        '<table border="0" cellpadding="0" cellspacing="0" !=class !=style>',
+        '<table border="0" cellpadding="0" cellspacing="0" !=align !=class !=style>',
       htmlClose:
         '</table>',
       binds: {
+        align: '',
         class: '',
         style: ''
       }
@@ -141,10 +142,11 @@ var _ = require('lodash'),
      */
     tdiv: {
       binds: {
+        align: '',
         class: '',
         style: ''
       },
-      html: '[table class="!class" style="width:100%;"]' +
+      html: '[table align="!align" class="!class" style="width:100%;"]' +
              '<tr>' +
               '<td !=style>',
       htmlClose:
