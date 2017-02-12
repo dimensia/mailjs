@@ -14,6 +14,17 @@
  </head>
 
  <body>
+  <style>
+    h5 {
+      color: #444;
+      font-size: 16px;
+    }
+
+    u {
+      font-family: courier;
+      text-decoration: none;
+    }
+  </style>
   <a href="https://github.com/dimensia/mailjs"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
   <div class="header">
    <i class="fa fa-envelope-o"></i>
@@ -124,6 +135,49 @@ binds: {
     <div class="example">Bind Usage and Definition Example</div>
 
     <p>Bind definitions can also be <a href="#functionTemplates">function</a>s as well.</p>
+
+    <h5>Bind Reserved Names and Applicability</h5>
+
+    <p>The binding syntax will ignore binds of the form "!important", "!doctype", and any binds that contain non-alphabetical characters (for example,
+      "&lt!--", "&lt;![", and so on) and exclamation points do not need to be escaped in those circumstances.</p>
+
+    <h5>HTML Attribute Assignment Binds</h5>
+
+    <p>Binds also support a special assignment syntax of the form: <u>!=<i>bindName</i></u> for HTML attributes.</p>
+
+    <p>If the <u>bindName</u> binding is present, it expands to:  <u><i>bindName</i>="<i>value-of-bindName</i>"</u>.  If the binding is not
+    present, then nothing is output (if a space appears before the binding, then it is removed as well).</p>
+
+    <p>Using braces ({, }) around the name is also allowed like with regular binds.</p>
+
+    <pre class="code">src: '&lt;a !=href !=style>',
+binds: {
+  href: 'http://apple.com',
+  style: ''
+}
+//resolves to: '&lt;a href="http://apple.com">'</pre>
+    <div class="example">HTML Attribute Assignment Bind Example</div>
+
+
+    <h5>CSS Attribute Assignment Binds</h5>
+
+    <p>There is also an assignment binding syntax for CSS attributes: of the form: <u>!:<i>bindName</i>;</u>.</p>
+
+    <p>If the <u>bindName</u> binding is present, it expands to:  <u><i>bindName</i>:<i>value-of-bindName</i>;</u>.  <u>bindName</u> is also
+    converted to "kebab case" as is standard with CSS attribute names; for example: "fontFamily" becomes "font-family".  If the binding is not
+    present, then nothing is output (if a semicolon appears after the binding, then it is removed as well).</p>
+
+    <p>Using braces ({, }) around the name is also allowed like with regular binds.</p>
+
+    <pre class="code">style="!color;!fontSize;">',
+binds: {
+  fontSize: '12px',
+  color: ''
+}
+//resolves to: 'style="font-size:#888;"'</pre>
+    <div class="example">CSS Attribute Assignment Bind Example</div>
+
+
 
     <h4>Templates</h4>
 
