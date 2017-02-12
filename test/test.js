@@ -554,6 +554,28 @@ describe( 'generation', function() {
       '<table border="0" cellpadding="0" cellspacing="0" class="outer-cls" style="width:100%;"><tr><td></td></tr></table>'
     );
   });
+
+  it( 'should add css to existing style tags', function() {
+    expect(
+      mailjs.render({
+        src: `[notificationBody]`,
+        html: true,
+        css: `
+.foo {
+  color: #fff;
+  background-color: #ededed;
+}
+`,
+        templates: {
+          notificationBody: {
+            html: '<table border="0" cellpadding="0" cellspacing="0" class="foo" style="width:100%;"><tr><td></td></tr></table>'
+          }
+        }
+      })
+    ).to.eql(
+      '<table border="0" cellpadding="0" cellspacing="0" class="foo" style="color: #fff; background-color: #ededed; width: 100%;" width="100%" bgcolor="#ededed"><tr><td></td></tr></table>'
+    );
+  });
 });
 
 describe( 'generation with boilerplate', function() {
