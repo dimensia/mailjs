@@ -1,5 +1,6 @@
 
-var juice = require('juice');
+var _ = require('lodash'),
+    juice = require('juice');
 
 
 /**
@@ -56,7 +57,7 @@ var juice = require('juice');
     },
 
     borderRadius: {
-      html: '-moz-border-radius:!borderRadius;-webkit-border-radius:!borderRadius;border-radius:!borderRadius'
+      html: '-moz-border-radius:!borderRadius;-webkit-border-radius:!borderRadius;!:borderRadius;'
     },
 
 
@@ -71,7 +72,7 @@ var juice = require('juice');
      */
     table: {
       html:
-        '<table border="0" cellpadding="0" cellspacing="0" style="!style">',
+        '<table border="0" cellpadding="0" cellspacing="0" !style>',
       htmlClose:
         '</table>',
       binds: {
@@ -102,15 +103,15 @@ var juice = require('juice');
           return (
             '<div>' +
              '<!--\\[if mso\\]>' +
-              '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="!href" style="height:!height;v-text-anchor:middle;width:!width;" arcsize="10%" stroke="f" fillcolor="!backgroundColor">' +
+              '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" !=href style="!:height;v-text-anchor:middle;!:width;" arcsize="10%" stroke="f" fillcolor="!backgroundColor">' +
                '<w:anchorlock/>' +
-               '<center style="color:!color;font-family:sans-serif;font-size:!fontSize;font-weight:bold;">!label</center>' +
+               '<center style="!:color;font-family:sans-serif;!:fontSize;font-weight:bold;">!label</center>' +
               '</v:roundrect>' +
              '<!\\[endif\\]-->' +
              '<!\\[if !mso\\]>' +
               '[table]' +
                '<tr>' +
-                '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="[borderRadius=!borderRadius];color:!color;display:block;">' +
+                '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="[borderRadius=!borderRadius];!:color;display:block;">' +
                  '<a href="!href" style="color:!color;font-size:!fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
                 '</td>' +
                '</tr>' +
@@ -122,8 +123,8 @@ var juice = require('juice');
           return (
             '[table]' +
              '<tr>' +
-              '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="color:!color;display:block;">' +
-               '<a href="!href" style="color:#ffffff;font-size:!fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
+              '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="!:color;display:block;">' +
+               '<a !=href style="color:#ffffff;!:fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
               '</td>' +
              '</tr>' +
             '[/table]'
@@ -139,11 +140,12 @@ var juice = require('juice');
      */
     tdiv: {
       binds: {
+        class: '',
         style: ''
       },
       html: function( scope ) {
         return (
-          '[table style="width:100%"]' +
+          '[table !=class style="width:100%"]' +
            '<tr>' +
             '<td' + scope.if( 'style', ' style="!style"' ) + '>'
         );
@@ -167,7 +169,7 @@ var juice = require('juice');
     imglink: {
       binds: {
       },
-      html: '<a href="!href" style="border:none;"><img style="height:!height;" src="!src"></a>',
+      html: '<a !=href style="border:none;"><img style="!:height;" !=src></a>',
       text: '!href'
     },
 
@@ -178,7 +180,7 @@ var juice = require('juice');
      */
 
     doctype: {
-      src: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
+      src: '<\\!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
     },
 
     wrapper: {
@@ -217,7 +219,7 @@ var juice = require('juice');
 '#outlook a {padding:0;}\n' + // Force Outlook to provide a "view in browser" menu link.
 
 // Prevent Webkit and Windows Mobile platforms from changing default font sizes, while not breaking desktop design.
-'body{width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0;}\n' +
+'body{width:100% \\!important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0;}\n' +
 
 // Force Hotmail to display emails at full width
 '.ExternalClass {width:100%;}\n' +
@@ -628,31 +630,61 @@ a:hover { color: green; }
         case '!':
           si++;
 
-          var assign = false;
-          if (src.substring(si, si+1) === '=') {
-            assign = true;
+          var assignmentBind,
+              delim = src.substring( si, si + 1 );
+          if ( delim === '=' || delim === ':' ) {
+            assignmentBind = delim;
             si++;
           }
 
           //var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*(\|\s*[a-zA-Z0-9_|\s]+)?\}/ );
           var matches = src.substring( si ).match( /^([a-zA-Z0-9_]+)|^\{\s*([a-zA-Z0-9_]+)\s*\}/ );
 
-          if ( !matches || matches.length < 3 )
-            throw new Error( "Missing variable name after !." );
+          if ( !matches || matches.length < 3 ) {
+            // not a binding, skip past it ... i.e. might be something like <!-- ...
+            dest += '!';
+            break;
+          }
 
           var name = matches[ 1 ] || matches[ 2 ];
           si += matches[ 0 ].length;
+
+          // remove the trailing semicolon so that we don't output it if the binding is blank
+          if ( assignmentBind === ':' && src.substring( si, si + 1 ) === ';' ) {
+            si++;
+          }
+
+          if ( name.match( /^(important|doctype)$/i ) ) {
+            dest += '!' + name;
+            break;
+          }
 
           var bind = this.resolveBind( name, el, binds, template );
           if ( bind == null )
             throw new Error( 'No bind definition for !' + name + ' when processing' + ( el ? ' template ' + el.tag : '' ) + ' (mode=' + ( html ? 'HTML' : 'text' ) + '):\n\n' + src );
 
           var nestedSrc;
-          if ( assign ) {
-            if ( !bind )
-              break;
+          if ( assignmentBind ) {
+            if ( !bind ) {
+              const dlast = dest.length - 1;
 
-            nestedSrc = name + '="' + bind + '"';
+              if ( dlast >= 0 && dest.substring( dlast ) === ' ' ) {
+                dest = dest.substring( 0, dlast );
+                dlast--;
+              }
+
+              break;
+            }
+
+            switch ( assignmentBind ) {
+            case '=':
+              nestedSrc = name + '="' + bind + '"';
+              break;
+            case ':':
+              nestedSrc = _.kebabCase( name ) + ':' + bind + ';';
+              break;
+            }
+
           } else {
             nestedSrc = bind;
           }

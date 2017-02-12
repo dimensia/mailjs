@@ -209,6 +209,26 @@ describe( 'generation', function() {
     );
   });
 
+  it( 'should ignore !important and !doctype binds', function() {
+    expect(
+      mailjs.render({
+        src: 'font-size: 12px !important; !doctype;'
+      })
+    ).to.eql(
+      'font-size: 12px !important; !doctype;'
+    );
+  });
+
+  it( 'should ignore <!-- and <![ in bindings and trailing !', function() {
+    expect(
+      mailjs.render({
+        src: '<!-- comment --><!--\\[if microsoft] ... <\\[endif]--> !'
+      })
+    ).to.eql(
+      '<!-- comment --><!--[if microsoft] ... <[endif]--> !'
+    );
+  });
+
   it( 'should process templates', function() {
     expect(
       mailjs.render({
@@ -414,7 +434,7 @@ describe( 'generation', function() {
     );
   });
 
-  it( 'should support != syntax', function() {
+  it( 'should support = assignment binds', function() {
     expect(
       mailjs.render({
         src: '<a !=href !=style>',
@@ -424,7 +444,21 @@ describe( 'generation', function() {
         }
       })
     ).to.equal(
-      '<a  style="color:#000;">'
+      '<a style="color:#000;">'
+    );
+  });
+
+  it( 'should support : assignment binds', function() {
+    expect(
+      mailjs.render({
+        src: '<a style="!:color;!:fontSize">',
+        binds: {
+          color: '',
+          fontSize: '12px'
+        }
+      })
+    ).to.equal(
+      '<a style="font-size:12px;">'
     );
   });
 

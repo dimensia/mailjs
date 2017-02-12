@@ -1,10 +1,11 @@
 {
   "name": "mailjs",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "JavaScript HTML and text email renderer/formatter.",
   "main": "mail.js",
   "dependencies": {
-    "juice": "^4.0.2"
+    "juice": "4.0.2",
+    "lodash": "4.17.4"
   },
   "devDependencies": {
     "chai": "^1.9.1",
