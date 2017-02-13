@@ -98,6 +98,7 @@ var _ = require('lodash'),
         height:          '40px',
         width:           '300px',
         borderRadius:    '',        // set to '6px' for example
+        margin:          ''
       },
       html: function( scope ) {
         var borderRadius = scope.binding( 'borderRadius' );
@@ -112,7 +113,7 @@ var _ = require('lodash'),
               '</v:roundrect>' +
              '<!\\[endif\\]-->' +
              '<!\\[if \\!mso\\]>' +
-              '[table]' +
+              '[table style="!:margin"]' +
                '<tr>' +
                 '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="[borderRadius=!borderRadius];!:color;display:block;">' +
                  '<a href="!href" style="color:!color;font-size:!fontSize;font-weight:bold;!:fontFamily;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
@@ -124,7 +125,7 @@ var _ = require('lodash'),
           );
         } else {
           return (
-            '[table]' +
+            '[table style="!:margin"]' +
              '<tr>' +
               '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="!:color;display:block;">' +
                '<a !=href style="!:color;!:fontSize;font-weight:bold;!:fontFamily;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
