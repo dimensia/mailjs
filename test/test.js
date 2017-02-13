@@ -576,7 +576,22 @@ describe( 'generation', function() {
       '<table border="0" cellpadding="0" cellspacing="0" class="foo" style="color: #fff; background-color: #ededed; width: 100%;" width="100%" bgcolor="#ededed"><tr><td></td></tr></table>'
     );
   });
+
+  it( 'should support buttons', function() {
+    expect(
+      mailjs.render({
+        src: '[button label="View" href="http://apple.com"]',
+        html: true
+      })
+    ).to.eql(
+      '<table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" width="300" height="40" bgcolor="#d62828" style="color:#ffffff;display:block;">' +
+       '<a href="http://apple.com" style="color:#ffffff;font-size:16px;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:40px;width:100%;display:inline-block">View</a>' +
+      '</td></tr></table>'
+    );
+  });
 });
+
+
 
 describe( 'generation with boilerplate', function() {
   before( function() {

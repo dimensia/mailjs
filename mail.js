@@ -126,7 +126,7 @@ var _ = require('lodash'),
             '[table]' +
              '<tr>' +
               '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="!:color;display:block;">' +
-               '<a !=href style="color:#ffffff;!:fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
+               '<a !=href style="!:color;!:fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
               '</td>' +
              '</tr>' +
             '[/table]'
@@ -629,7 +629,7 @@ a:hover { color: green; }
         case '!':
           si++;
 
-          var assignmentBind,
+          var assignmentBind = undefined,
               delim = src.substring( si, si + 1 );
           if ( delim === '=' || delim === ':' ) {
             assignmentBind = delim;
