@@ -110,7 +110,7 @@ var _ = require('lodash'),
                '<center style="!:color;font-family:sans-serif;!:fontSize;font-weight:bold;">!label</center>' +
               '</v:roundrect>' +
              '<!\\[endif\\]-->' +
-             '<!\\[if !mso\\]>' +
+             '<!\\[if \\!mso\\]>' +
               '[table]' +
                '<tr>' +
                 '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="[borderRadius=!borderRadius];!:color;display:block;">' +

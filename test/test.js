@@ -589,6 +589,17 @@ describe( 'generation', function() {
       '</td></tr></table>'
     );
   });
+
+  it( 'should support rounded buttons', function() {
+    expect(
+      mailjs.render({
+        src: '[button label="View" href="http://apple.com" borderRadius="6px"]',
+        html: true
+      })
+    ).to.eql(
+      '<div><!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://apple.com" style="height:40px;v-text-anchor:middle;width:300px;" arcsize="10%" stroke="f" fillcolor="#d62828"><w:anchorlock/><center style="color:#ffffff;font-family:sans-serif;font-size:16px;font-weight:bold;">View</center></v:roundrect><![endif]--><![if !mso]><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" width="300" height="40" bgcolor="#d62828" style="-moz-border-radius:6px;-webkit-border-radius:6px;border-radius:6px;;color:#ffffff;display:block;"><a href="http://apple.com" style="color:#ffffff;font-size:16px;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:40px;width:100%;display:inline-block">View</a></td></tr></table><![endif]></div>'
+    );
+  });
 });
 
 
