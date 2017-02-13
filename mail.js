@@ -94,6 +94,7 @@ var _ = require('lodash'),
         color:           '#ffffff',
         backgroundColor: '#d62828',
         fontSize:        '16px',
+        fontFamily:      'sans-serif',
         height:          '40px',
         width:           '300px',
         borderRadius:    '',        // set to '6px' for example
@@ -107,14 +108,14 @@ var _ = require('lodash'),
              '<!--\\[if mso\\]>' +
               '<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" !=href style="!:height;v-text-anchor:middle;!:width;" arcsize="10%" stroke="f" fillcolor="!backgroundColor">' +
                '<w:anchorlock/>' +
-               '<center style="!:color;font-family:sans-serif;!:fontSize;font-weight:bold;">!label</center>' +
+               '<center style="!:color;!:fontFamily;!:fontSize;font-weight:bold;">!label</center>' +
               '</v:roundrect>' +
              '<!\\[endif\\]-->' +
              '<!\\[if \\!mso\\]>' +
               '[table]' +
                '<tr>' +
                 '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="[borderRadius=!borderRadius];!:color;display:block;">' +
-                 '<a href="!href" style="color:!color;font-size:!fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
+                 '<a href="!href" style="color:!color;font-size:!fontSize;font-weight:bold;!:fontFamily;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
                 '</td>' +
                '</tr>' +
               '[/table]' +
@@ -126,7 +127,7 @@ var _ = require('lodash'),
             '[table]' +
              '<tr>' +
               '<td align="center" width="[pixels=!width]" height="[pixels=!height]" bgcolor="!backgroundColor" style="!:color;display:block;">' +
-               '<a !=href style="!:color;!:fontSize;font-weight:bold;font-family:sans-serif;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
+               '<a !=href style="!:color;!:fontSize;font-weight:bold;!:fontFamily;text-decoration:none;line-height:!height;width:100%;display:inline-block">!label</a>' +
               '</td>' +
              '</tr>' +
             '[/table]'
